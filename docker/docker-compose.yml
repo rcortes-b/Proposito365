@@ -1,5 +1,19 @@
 
 services:
+  backend:
+    build:
+      context: .. 
+      dockerfile: docker/backend/Dockerfile
+    container_name: propositos_backend_container
+    restart: always
+    networks: 
+      - app_network
+    env_file: ".env"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
   db:
     image: mysql:latest
     container_name: propositos_mysql_container
@@ -16,3 +30,5 @@ volumes:
 
 networks:
   app_network:
+    name: propositos_network
+    driver: bridge
