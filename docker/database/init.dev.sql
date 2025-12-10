@@ -3,7 +3,7 @@
 --	- Get resolutions by user id
 --	- Well i just realized that this database desing is overkill :)
 --
-
+USE propositos_db;
 
 CREATE TABLE users (
     `id` int AUTO_INCREMENT PRIMARY KEY,
@@ -13,6 +13,11 @@ CREATE TABLE users (
 
 );
 
+INSERT INTO users (`id`, `email`, `password`) VALUES 
+(1, 'raulcortes6@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.'), 
+(2, 'csraulcb@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.'), 
+(3, 'raulcortes.dev@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.');  
+
 CREATE TABLE groups_table (
 	`id` int AUTO_INCREMENT PRIMARY KEY,
 	`name` VARCHAR(50) NOT NULL, -- Should this be UNIQUE? Or should we allow two groups with the same name?
@@ -20,6 +25,10 @@ CREATE TABLE groups_table (
 	`capacity` int NOT NULL CHECK (capacity > 0 AND capacity <= 100), -- A group capacity must be maximum 20 users
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO groups_table (`id`, `name`, `description`, `capacity`) VALUES 
+(1, 'Chakras', 'Este grupo es la prueba 1', 3), 
+(2, 'Mue', 'Este grupo es la prueba 2', 3);
 
 CREATE TABLE resolution_status (
 	`id` int AUTO_INCREMENT PRIMARY KEY,

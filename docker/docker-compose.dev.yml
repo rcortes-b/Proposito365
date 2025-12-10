@@ -1,0 +1,21 @@
+
+services:
+  db:
+    image: mysql:latest
+    container_name: dev_propositos_mysql_container
+    volumes: 
+      - dev_db_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    networks: 
+      - dev_app_network
+    restart: always
+    env_file: ".env"
+    ports:
+      - "3307:3306"
+volumes:
+  dev_db_data:
+
+networks:
+  dev_app_network:
+    name: dev_propositos_network
+    driver: bridge
