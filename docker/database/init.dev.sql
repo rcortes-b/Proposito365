@@ -7,16 +7,17 @@ USE propositos_db;
 
 CREATE TABLE users (
     `id` int AUTO_INCREMENT PRIMARY KEY,
+	`username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
-    `password` VARCHAR(68) NOT NULL, -- This is for bcrypt
+    `password` VARCHAR(60) NOT NULL, -- This is for bcrypt
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
 
-INSERT INTO users (`id`, `email`, `password`) VALUES 
-(1, 'raulcortes6@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.'), 
-(2, 'csraulcb@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.'), 
-(3, 'raulcortes.dev@gmail.com', '{bcrypt}$2a$10$ZeSLONruQo4rBSiq8lxUAOmAlIg/Ej/QMwNoMkiIcPEdpXSk.en8.');  
+INSERT INTO users (`id`, `email`, `username`, `password`) VALUES 
+(1, 'raulcortes6@gmail.com', 'Raul', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W'), 
+(2, 'csraulcb@gmail.com', 'Raul2', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W'), 
+(3, 'raulcortes.dev@gmail.com', 'Raul3', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W');  
 
 CREATE TABLE groups_table (
 	`id` int AUTO_INCREMENT PRIMARY KEY,

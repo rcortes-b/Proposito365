@@ -1,0 +1,11 @@
+application:
+ security:
+  jwt:
+   secret-key: ${JWT_SECRET_KEY}
+   expiration: 15 # This is minutes
+  cookie:
+   name: ${COOKIE_NAME}
+   http-only: true
+   secure: true
+   max-age: 15m
+   same-site: Strict

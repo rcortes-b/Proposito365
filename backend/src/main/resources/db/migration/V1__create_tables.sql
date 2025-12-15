@@ -7,8 +7,9 @@
 
 CREATE TABLE users (
     `id` int AUTO_INCREMENT PRIMARY KEY,
+	`username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
-    `password` VARCHAR(68) NOT NULL, -- This is for bcrypt
+    `password` VARCHAR(60) NOT NULL, -- This is for bcrypt
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
