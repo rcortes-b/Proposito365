@@ -3,7 +3,7 @@ services:
   nginx_server:
     build:
       context: ..
-      build: docker/frontend/Dockerfile
+      dockerfile: docker/frontend/Dockerfile
     container_name: propositos_nginx_container
     restart: always
     networks:
