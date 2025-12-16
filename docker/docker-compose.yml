@@ -1,5 +1,18 @@
 
 services:
+  nginx_server:
+    build:
+      context: .
+      build: frontend/Dockerfile
+    container_name: propositos_nginx_container
+    restart: always
+    networks:
+      - app_network
+    ports:
+      - "443:443"
+    depends_on:
+      - backend
+
   backend:
     build:
       context: .. 
