@@ -1,5 +1,8 @@
 # Proposito365
 
+## Change before go prod
+	- SSL certificates --> Change the CN for the IP/Domain
+
 ## Docker
 
 Using docker compose to deploy:
@@ -16,3 +19,5 @@ application.properties of springboot has the db user & pass as environment varia
 
 ### Methods
 	- Roles && Status -> findById
+
+
