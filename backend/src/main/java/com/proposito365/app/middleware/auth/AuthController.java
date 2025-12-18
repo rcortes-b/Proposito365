@@ -41,8 +41,8 @@ public class AuthController {
 		Authentication authentication = authService.login(loginRequestDTO);
 		final String accessToken = authService.generateToken(authentication, false);
 		final String refreshToken = authService.generateToken(authentication, true);
-		Cookie cookie = createAuthCookie(accessToken, false);
-		Cookie cookieRefresh = createAuthCookie(refreshToken, true);
+		final Cookie cookie = createAuthCookie(accessToken, false);
+		final Cookie cookieRefresh = createAuthCookie(refreshToken, true);
 		response.addCookie(cookie);
 		response.addCookie(cookieRefresh);
 	}
@@ -52,8 +52,9 @@ public class AuthController {
 	*/
 	@PostMapping("/auth/logout")
 	public void logout(HttpServletResponse response) {
-		final Cookie cookie = new Cookie(cookieProperties.getName(), "");
-		final Cookie cookieRefresh = new Cookie(cookieProperties.getNameRefresh(), "");
+		logger.info("LLEGO???");
+		final Cookie cookie = createAuthCookie("", false);
+		final Cookie cookieRefresh = createAuthCookie("", true);
 		cookie.setMaxAge(0);
 		cookieRefresh.setMaxAge(0);
 		response.addCookie(cookie);
@@ -61,16 +62,19 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public void refresh(HttpServletResponse response) {
+	public void refresh(HttpServletResponse response, Authentication authentication) {
+
+		UserSecurity userSecurity = (UserSecurity)authentication.getPrincipal();
+		logger.info("[REFRESH]" + userSecurity.getUsername());
+		final String accessToken = authService.generateToken(authentication, false);
+		Cookie cookie = createAuthCookie(accessToken, false);
+		response.addCookie(cookie);
 		/*
 			General idea: authService validate, the authService inspect the 
 			cookies looking for the refreshName, if not exists throws 401
 			If exists -> get the jwt, decode it and based in the ID get the username
 			then generateToken based in the username.
 		*/
-		final String token = "Change me please";
-		Cookie cookie = createAuthCookie(token, false);
-		response.addCookie(cookie);
 	}
 	
 	private Cookie createAuthCookie(String token, boolean isRefresh) {

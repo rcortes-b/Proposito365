@@ -47,15 +47,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request,
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain) throws ServletException, IOException {
-        final Optional<String> token = getJwtFromCookie(request);
-		
+		boolean isRefresh = request.getRequestURI().equals("/refresh");
+		final Optional<String> token = getJwtFromCookie(request, isRefresh);
+
         if (token.isEmpty() || !authService.validateToken(token.get())) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             throw new BadCredentialsException("Invalid token");
         }
 		
         String userName = authService.getUserFromToken(token.get());
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+        UserDetails userDetails;
+		logger.info("HOLLALALALALALALALALALALA   " + userName);
+		if (isRefresh)
+			userDetails = authService.loadUserById(Long.valueOf(userName));
+		else
+			userDetails = userDetailsService.loadUserByUsername(userName);
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         authenticationToken.setDetails(userDetails);
@@ -63,14 +69,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private Optional<String> getJwtFromCookie(HttpServletRequest request) {
+    private Optional<String> getJwtFromCookie(HttpServletRequest request, boolean isRefresh) {
         final Cookie[] cookies = request.getCookies();
-        
+		final String cookieName = isRefresh == true ? cookieProperties.getNameRefresh() : cookieProperties.getName();
 		if (cookies == null || cookies.length == 0)
             return Optional.empty();
 
         return (Arrays.stream(cookies)
-            .filter(cookie -> cookie.getName().equals(cookieProperties.getName()))
+            .filter(cookie -> cookie.getName().equals(cookieName))
             .map(Cookie::getValue)
             .findFirst());
     }

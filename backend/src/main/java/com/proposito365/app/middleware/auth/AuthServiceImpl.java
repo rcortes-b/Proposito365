@@ -1,10 +1,12 @@
 package com.proposito365.app.middleware.auth;
 
 import java.nio.file.ProviderNotFoundException;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.jboss.logging.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +18,14 @@ import org.springframework.stereotype.Service;
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
 import com.proposito365.app.middleware.auth.jwt.TokenService;
+import com.proposito365.app.middleware.auth.utils.CookieProperties;
 import com.proposito365.app.models.User;
 import com.proposito365.app.repository.UserRepository;
 import com.proposito365.app.repository.UserRepositoryImpl;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 @Service
@@ -86,15 +93,47 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(final String login) throws UsernameNotFoundException {
 		Optional<User> user = userRepositoryImpl.findByUsernameOrEmail(login);
+
 		if (user.isEmpty())
 			logger.error("[USER] : User not found with login: " + login + " --- Remember add the Exception 2!!!");
 		logger.info("[USER] : User successfully obtained with username " + user.get().getUsername());
 		return new UserSecurity(user.get());
 	}
 
+
 	@Override
 	public String generateToken(Authentication authentication, boolean isRefresh) {
 		return tokenService.generateToken(authentication, isRefresh);
 	}
+
+	@Override
+	public void validateRefreshCookie(HttpServletRequest request, HttpServletResponse response) {
+		final Cookie[] cookies = request.getCookies();
+		
+		if (cookies == null || cookies.length == 0) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            throw new BadCredentialsException("Invalid refresh token");
+		}
+		CookieProperties cookieProperties = new CookieProperties();
+		Optional<String> token = Arrays.stream(cookies)
+            						   .filter(cookie -> cookie.getName().equals(cookieProperties.getNameRefresh()))
+            						   .map(Cookie::getValue)
+            						   .findFirst();
+		if (token.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            throw new BadCredentialsException("Invalid refresh token");
+		}
+	}
+
+	@Override
+	public UserDetails loadUserById(Long id) {
+		logger.info("VA LOKO  " + id);
+		Optional<User> user = userRepository.findById(id);
+		logger.info("VA LOKOK");
+		if (user.isEmpty())
+			logger.error("[USER] : User not found with id: " + id + " --- Remember add the Exception 3!!!");
+		logger.info("[USER] : User successfully obtained with username " + user.get().getUsername());
+		return new UserSecurity(user.get());
+	} 
 	
 }
