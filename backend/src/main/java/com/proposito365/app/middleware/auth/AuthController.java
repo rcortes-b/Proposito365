@@ -1,12 +1,14 @@
 package com.proposito365.app.middleware.auth;
 
 import org.jboss.logging.Logger;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
+import com.proposito365.app.middleware.auth.jwt.TokenService;
 import com.proposito365.app.middleware.auth.utils.CookieProperties;
 
 import jakarta.servlet.http.Cookie;
@@ -36,9 +38,13 @@ public class AuthController {
 
 	@PostMapping("/auth/login")
 	public void login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
-		final String token = authService.login(loginRequestDTO);
-		Cookie cookie = createAuthCookie(token);
+		Authentication authentication = authService.login(loginRequestDTO);
+		final String accessToken = authService.generateToken(authentication, false);
+		final String refreshToken = authService.generateToken(authentication, true);
+		Cookie cookie = createAuthCookie(accessToken, false);
+		Cookie cookieRefresh = createAuthCookie(refreshToken, true);
 		response.addCookie(cookie);
+		response.addCookie(cookieRefresh);
 	}
 
 	/* Creates a new cookie with the same name and sets it to empty and expired
@@ -47,26 +53,37 @@ public class AuthController {
 	@PostMapping("/auth/logout")
 	public void logout(HttpServletResponse response) {
 		final Cookie cookie = new Cookie(cookieProperties.getName(), "");
+		final Cookie cookieRefresh = new Cookie(cookieProperties.getNameRefresh(), "");
 		cookie.setMaxAge(0);
+		cookieRefresh.setMaxAge(0);
 		response.addCookie(cookie);
-		
+		response.addCookie(cookieRefresh);
 	}
 
 	@PostMapping("/refresh")
 	public void refresh(HttpServletResponse response) {
-		// Validate refresh token
-			// Create New Cookie
-				//response.addCookie()
+		/*
+			General idea: authService validate, the authService inspect the 
+			cookies looking for the refreshName, if not exists throws 401
+			If exists -> get the jwt, decode it and based in the ID get the username
+			then generateToken based in the username.
+		*/
+		final String token = "Change me please";
+		Cookie cookie = createAuthCookie(token, false);
+		response.addCookie(cookie);
 	}
 	
-	private Cookie createAuthCookie(String token) {
+	private Cookie createAuthCookie(String token, boolean isRefresh) {
+		logger.info("[COOKIE INFO]: " + cookieProperties.toString() + "      " + token);
         final String SAME_SITE_KEY = "SameSite";
-        final Cookie cookie = new Cookie(cookieProperties.getName(), token);
+		final String name = isRefresh == true ? cookieProperties.getNameRefresh() : cookieProperties.getName();
+		final int max_age = (int)(isRefresh == true ? cookieProperties.getMaxAgeRefresh()
+								: cookieProperties.getMaxAge()).getSeconds();
+        final Cookie cookie = new Cookie(name, token);
         cookie.setHttpOnly(cookieProperties.isHttpOnly());
         cookie.setSecure(cookieProperties.isSecure());
 		cookie.setPath("/");
-		logger.info("[CONTROLLER INFO] Set max age is " + (int)cookieProperties.getMaxAge().getSeconds());
-        cookie.setMaxAge((int)cookieProperties.getMaxAge().getSeconds());
+        cookie.setMaxAge(max_age);
         cookie.setAttribute(SAME_SITE_KEY, cookieProperties.getSameSite());
         return cookie;
     }

@@ -16,6 +16,10 @@ public class UserSecurity implements UserDetails {
 		this.user = user;
 	}
 
+	public Long getId() {
+		return user.getId();
+	}
+	
 	@Override
 	public String getUsername() {
 		return user.getUsername();

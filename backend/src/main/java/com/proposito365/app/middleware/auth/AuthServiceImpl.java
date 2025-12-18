@@ -66,16 +66,11 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	}
 
 	@Override
-	public String login(final LoginRequestDTO loginRequestDTO) {
+	public Authentication login(final LoginRequestDTO loginRequestDTO) {
 		try {
 			final AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
-			logger.info("[USER1] : Error while trying to login");
             final Authentication authRequest = AuthMapper.fromDto(loginRequestDTO);
-			logger.info("[USER2] : Error while trying to login");
-			logger.info("[USER DEBUG]: " + authRequest.getPrincipal().toString() + " " + authRequest.getCredentials().toString());
-            final Authentication authentication = authenticationManager.authenticate(authRequest);
-			logger.info("[USER3] : Error while trying to login");
-            return tokenService.generateToken(authentication);
+            return  authenticationManager.authenticate(authRequest);
 		} catch (Exception exception) {
 			logger.error("[USER] : Error while trying to login", exception);
             throw new ProviderNotFoundException("Error while trying to login");
@@ -95,6 +90,11 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 			logger.error("[USER] : User not found with login: " + login + " --- Remember add the Exception 2!!!");
 		logger.info("[USER] : User successfully obtained with username " + user.get().getUsername());
 		return new UserSecurity(user.get());
+	}
+
+	@Override
+	public String generateToken(Authentication authentication, boolean isRefresh) {
+		return tokenService.generateToken(authentication, isRefresh);
 	}
 	
 }

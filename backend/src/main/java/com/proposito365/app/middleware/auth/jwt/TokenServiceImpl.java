@@ -36,13 +36,13 @@ public class TokenServiceImpl implements TokenService {
 	}
 
 	@Override
-	public String generateToken(Authentication authentication) {
+	public String generateToken(Authentication authentication, boolean isRefresh) {
 		Instant now = Instant.now();
 		logger.info("[TOKEN INFO] " + authentication.getDetails());
 		logger.info("[TOKEN INFO] " + authentication.getPrincipal());
 		UserSecurity currentUser = (UserSecurity)authentication.getPrincipal();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-            .subject(currentUser.getUsername())
+            .subject(isRefresh == true ?  currentUser.getId().toString() : currentUser.getUsername())
             .issuedAt(now)
             .expiresAt(now.plus(jwtKeyExpiration, ChronoUnit.MINUTES))
             .build();

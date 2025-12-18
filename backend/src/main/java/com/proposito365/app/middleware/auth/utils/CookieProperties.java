@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "application.security.cookie")
 public class CookieProperties {
 	private String name;
+	private String nameRefresh;
 	private boolean httpOnly;
 	private boolean secure;
 	private Duration maxAge;
+	private Duration maxAgeRefresh;
 	private String sameSite;
 	
 	public String getName() {
@@ -20,6 +22,14 @@ public class CookieProperties {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getNameRefresh() {
+		return nameRefresh;
+	}
+
+	public void setNameRefresh(String nameRefresh) {
+		this.nameRefresh = nameRefresh;
 	}
 
 	public boolean isHttpOnly() {
@@ -46,6 +56,14 @@ public class CookieProperties {
 		this.maxAge = maxAge;
 	}
 
+	public Duration getMaxAgeRefresh() {
+		return maxAgeRefresh;
+	}
+
+	public void setMaxAgeRefresh(Duration maxAgeRefresh) {
+		this.maxAgeRefresh = maxAgeRefresh;
+	}
+	
 	public String getSameSite() {
 		return sameSite;
 	}
@@ -53,4 +71,13 @@ public class CookieProperties {
 	public void setSameSite(String sameSite) {
 		this.sameSite = sameSite;
 	}
+
+	@Override
+	public String toString() {
+		return "CookieProperties [name=" + name + ", nameRefresh=" + nameRefresh + ", httpOnly=" + httpOnly
+				+ ", secure=" + secure + ", maxAge=" + maxAge + ", maxAgeRefresh=" + maxAgeRefresh + ", sameSite="
+				+ sameSite + "]";
+	}
+
+	
 }

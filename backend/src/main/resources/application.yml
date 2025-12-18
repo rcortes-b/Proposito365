@@ -5,13 +5,9 @@ application:
    expiration: 15 # This is minutes
   cookie:
    name: ${COOKIE_NAME}
+   name-refresh: ${COOKIE_REFRESH_NAME}
    http-only: true
    secure: true # true is only for https, this will be modified
    max-age: 15m
+   max-age-refresh: 7d
    same-site: Strict
-  refresh_cookie:
-    name: ${COOKIE_REFRESH_NAME}
-    http-only: true
-    secure: true # true is only for https, this will be modified
-    max-age: 7d
-    same-site: Strict
