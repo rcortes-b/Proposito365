@@ -1,5 +1,9 @@
 package com.proposito365.app.middleware.security;
 
+import com.proposito365.app.middleware.auth.jwt.*;
+import com.proposito365.app.middleware.auth.utils.CookieProperties;
+
+import org.jboss.logging.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +18,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.proposito365.app.middleware.auth.AuthService;
 
@@ -28,6 +33,8 @@ import com.proposito365.app.middleware.auth.AuthService;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+	private final static Logger logger = Logger.getLogger(SecurityConfig.class);
+	public final static String PREFIX_URL_MATCHER = "/auth";
 	public final static String LOGIN_URL_MATCHER = "/auth/login";
 	public final static String LOGOUT_URL_MATCHER = "/auth/logout";
 	public final static String REGISTER_URL_MATCHER = "/auth/register";
@@ -35,26 +42,32 @@ public class SecurityConfig {
 	private AuthService authService;
 	private UserDetailsService userDetailsService;
 	private PasswordEncoder passwordEncoder;
+	private CookieProperties cookieProperties;
 
-	public SecurityConfig(AuthService authService, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+	public SecurityConfig(AuthService authService, UserDetailsService userDetailsService,
+							PasswordEncoder passwordEncoder, CookieProperties cookieProperties) {
 		this.authService = authService;
 		this.userDetailsService = userDetailsService;
 		this.passwordEncoder = passwordEncoder;
+		this.cookieProperties = cookieProperties;
 	}
 
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		
-		return http
+		SecurityFilterChain filter = http
 				.formLogin(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
 										.requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-										.anyRequest().permitAll()
+										.anyRequest().authenticated()
 										)
+				.addFilterBefore(new JwtAuthenticationFilter(authService, userDetailsService, cookieProperties),
+									UsernamePasswordAuthenticationFilter.class)
 				.httpBasic(Customizer.withDefaults())
 				.csrf(csrf -> csrf.disable())
 				.build();
+		logger.info("[AQUI BIEN O Q]");
+		return filter;
 	}
 
 	@Bean

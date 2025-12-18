@@ -46,9 +46,10 @@ public class AuthController {
 	*/
 	@PostMapping("/auth/logout")
 	public void logout(HttpServletResponse response) {
-		final Cookie cookie = new Cookie("auth-token", "");
+		final Cookie cookie = new Cookie(cookieProperties.getName(), "");
 		cookie.setMaxAge(0);
 		response.addCookie(cookie);
+		
 	}
 
 	@PostMapping("/refresh")
@@ -63,6 +64,7 @@ public class AuthController {
         final Cookie cookie = new Cookie(cookieProperties.getName(), token);
         cookie.setHttpOnly(cookieProperties.isHttpOnly());
         cookie.setSecure(cookieProperties.isSecure());
+		cookie.setPath("/");
 		logger.info("[CONTROLLER INFO] Set max age is " + (int)cookieProperties.getMaxAge().getSeconds());
         cookie.setMaxAge((int)cookieProperties.getMaxAge().getSeconds());
         cookie.setAttribute(SAME_SITE_KEY, cookieProperties.getSameSite());

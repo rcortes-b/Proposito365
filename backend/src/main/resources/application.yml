@@ -6,6 +6,12 @@ application:
   cookie:
    name: ${COOKIE_NAME}
    http-only: true
-   secure: true
+   secure: true # true is only for https, this will be modified
    max-age: 15m
    same-site: Strict
+  refresh_cookie:
+    name: ${COOKIE_REFRESH_NAME}
+    http-only: true
+    secure: true # true is only for https, this will be modified
+    max-age: 7d
+    same-site: Strict
