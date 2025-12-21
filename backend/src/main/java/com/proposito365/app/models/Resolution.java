@@ -2,9 +2,13 @@ package com.proposito365.app.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,14 +28,20 @@ public class Resolution {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	@Column(name = "user_id")
-	private Long user_id;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
+
 	@Column(name = "resolution")
 	private String resolution;
+
 	@Column(name = "details")
 	private String details;
-	@Column(name = "status_id")
-	private Long status_id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "status_id")
+	private Status status;
 
 	public Long getId() {
 		return id;
@@ -41,12 +51,12 @@ public class Resolution {
 		this.id = id;
 	}
 
-	public Long getUser_id() {
-		return user_id;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUser_id(Long user_id) {
-		this.user_id = user_id;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getResolution() {
@@ -65,17 +75,17 @@ public class Resolution {
 		this.details = details;
 	}
 
-	public Long getStatus_id() {
-		return status_id;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setStatus_id(Long status_id) {
-		this.status_id = status_id;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	@Override
 	public String toString() {
-		return "Resolution [id=" + id + ", user_id=" + user_id + ", resolution=" + resolution + ", details=" + details
-				+ ", status_id=" + status_id + "]";
-	}	
+		return "Resolution [id=" + id + ", user=" + user + ", resolution=" + resolution + ", details=" + details
+				+ ", status=" + status + "]";
+	}
 }

@@ -1,10 +1,15 @@
 package com.proposito365.app.models;
 
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,6 +26,12 @@ public class User {
 	private String username;
 	@Column(name="password")
 	private String password;
+
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<UserGroup> groups;
+	
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	private Set<Resolution> resolutions;
 
 	public User() {}
 
@@ -62,9 +73,27 @@ public class User {
 		this.password = password;
 	}
 
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", email=" + email + ", username=" + username + ", password=" + password + "]";
+	public Set<UserGroup> getGroups() {
+		return groups;
 	}
 
+	public void setGroups(Set<UserGroup> groups) {
+		this.groups = groups;
+	}
+
+	public Set<Resolution> getResolutions() {
+		return resolutions;
+	}
+
+	public void setResolutions(Set<Resolution> resolutions) {
+		this.resolutions = resolutions;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", email=" + email + ", username=" + username + ", password=" + password + ", groups="
+				+ groups + ", resolutions=" + resolutions + "]";
+	}
+
+	
 }

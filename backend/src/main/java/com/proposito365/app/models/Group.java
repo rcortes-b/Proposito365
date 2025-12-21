@@ -1,10 +1,16 @@
 package com.proposito365.app.models;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,7 +26,10 @@ public class Group {
 	private String description;
 	@Column(name="capacity")
 	private int capacity;
-	
+
+	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private Set<UserGroup> users;
+
 	public Long getId() {
 		return id;
 	}
@@ -51,6 +60,14 @@ public class Group {
 
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
+	}
+
+	public Set<UserGroup> getUsers() {
+		return users;
+	}
+
+	public void setUsers(Set<UserGroup> users) {
+		this.users = users;
 	}
 
 	@Override

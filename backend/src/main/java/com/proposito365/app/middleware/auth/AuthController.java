@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
-import com.proposito365.app.middleware.auth.jwt.TokenService;
 import com.proposito365.app.middleware.auth.utils.CookieProperties;
 
 import jakarta.servlet.http.Cookie;
