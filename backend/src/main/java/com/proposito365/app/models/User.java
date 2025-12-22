@@ -1,7 +1,8 @@
 package com.proposito365.app.models;
 
-import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +32,7 @@ public class User {
     private Set<UserGroup> groups;
 	
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	@JsonManagedReference
 	private Set<Resolution> resolutions;
 
 	public User() {}
@@ -92,7 +94,7 @@ public class User {
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", email=" + email + ", username=" + username + ", password=" + password + ", groups="
-				+ groups + ", resolutions=" + resolutions + "]";
+			 + ", resolutions=" + "]";
 	}
 
 	

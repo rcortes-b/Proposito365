@@ -25,7 +25,7 @@ public class UserGroup {
 	private Group group;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "profile_id")
+	@JoinColumn(name = "role_id")
 	private Roles role;
 
 	public UserGroupId getUserGroupId() {

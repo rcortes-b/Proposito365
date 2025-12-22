@@ -17,6 +17,12 @@ public class Status {
 	@Column(name = "value")
 	private String value;
 
+	public Status() {}
+
+	public Status(String value) {
+		
+	}
+
 	public Long getId() {
 		return id;
 	}

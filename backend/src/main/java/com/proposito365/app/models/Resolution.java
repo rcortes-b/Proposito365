@@ -1,5 +1,7 @@
 package com.proposito365.app.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,22 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "resolutions")
 public class Resolution {
-	/*CREATE TABLE resolutions (
-	`id` int AUTO_INCREMENT PRIMARY KEY,
-	`user_id` int NOT NULL,
-	`resolution` VARCHAR(255) NOT NULL,
-	`details` VARCHAR(255),
-	`status_id` int NOT NULL,
-	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-	FOREIGN KEY (status_id) REFERENCES resolution_status(id)
-); */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -31,6 +22,7 @@ public class Resolution {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
+	@JsonBackReference
 	private User user;
 
 	@Column(name = "resolution")
@@ -42,6 +34,15 @@ public class Resolution {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "status_id")
 	private Status status;
+
+	public Resolution() {}
+
+	public Resolution(User user, String resolution, String details, Status status) {
+		this.user = user;
+		this.resolution = resolution;
+		this.details = details;
+		this.status = status;
+	}
 
 	public Long getId() {
 		return id;
@@ -85,7 +86,7 @@ public class Resolution {
 
 	@Override
 	public String toString() {
-		return "Resolution [id=" + id + ", user=" + user + ", resolution=" + resolution + ", details=" + details
-				+ ", status=" + status + "]";
+		return "Resolution [id=" + id + ", user="  + ", resolution=" + resolution + ", details=" + details
+				+ ", status="  + "]";
 	}
 }

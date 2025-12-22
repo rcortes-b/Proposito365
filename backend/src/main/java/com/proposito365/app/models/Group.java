@@ -1,7 +1,5 @@
 package com.proposito365.app.models;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.Column;
