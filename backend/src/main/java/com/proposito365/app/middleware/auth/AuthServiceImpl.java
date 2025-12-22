@@ -21,7 +21,6 @@ import com.proposito365.app.middleware.auth.jwt.TokenService;
 import com.proposito365.app.middleware.auth.utils.CookieProperties;
 import com.proposito365.app.models.User;
 import com.proposito365.app.repository.UserRepository;
-import com.proposito365.app.repository.UserRepositoryImpl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,16 +32,14 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	private static final Logger logger = Logger.getLogger(AuthServiceImpl.class);
 	
 	private UserRepository userRepository;
-	private UserRepositoryImpl userRepositoryImpl;
 	private TokenService tokenService;
 	private PasswordEncoder passwordEncoder;
 	private AuthenticationConfiguration authenticationConfiguration;
 
-	public AuthServiceImpl(UserRepository userRepository, UserRepositoryImpl userRepositoryImpl,
-							TokenService tokenService, PasswordEncoder passwordEncoder,
+	public AuthServiceImpl(UserRepository userRepository, TokenService tokenService,
+							PasswordEncoder passwordEncoder,
 								AuthenticationConfiguration authenticationConfiguration) {
 		this.userRepository = userRepository;
-		this.userRepositoryImpl = userRepositoryImpl;
 		this.tokenService = tokenService;
 		this.passwordEncoder = passwordEncoder;
 		this.authenticationConfiguration = authenticationConfiguration;
@@ -92,7 +89,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(final String login) throws UsernameNotFoundException {
-		Optional<User> user = userRepositoryImpl.findByUsernameOrEmail(login);
+		Optional<User> user = userRepository.findByUsernameOrEmail(login);
 
 		if (user.isEmpty())
 			logger.error("[USER] : User not found with login: " + login + " --- Remember add the Exception 2!!!");

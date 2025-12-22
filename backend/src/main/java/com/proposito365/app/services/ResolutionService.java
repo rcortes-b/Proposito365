@@ -3,6 +3,7 @@ package com.proposito365.app.services;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
@@ -16,6 +17,7 @@ import com.proposito365.app.models.Resolution;
 import com.proposito365.app.models.Status;
 import com.proposito365.app.models.User;
 import com.proposito365.app.repository.ResolutionRepository;
+import com.proposito365.app.repository.StatusRepository;
 
 import jakarta.transaction.Transactional;
 import tools.jackson.databind.json.JsonMapper;
@@ -38,11 +40,14 @@ public class ResolutionService {
 	public final static Logger logger = Logger.getLogger(ResolutionController.class);
 	private ResolutionRepository resolutionRepository;
 	private UserService userService;
+	private StatusRepository statusRepository;
 	private JsonMapper jsonMapper;
 
-	public ResolutionService(ResolutionRepository resolutionRepository, UserService userService, JsonMapper jsonMapper) {
+	public ResolutionService(ResolutionRepository resolutionRepository, UserService userService,
+								StatusRepository statusRepository, JsonMapper jsonMapper) {
 		this.resolutionRepository = resolutionRepository;
 		this.userService = userService;
+		this.statusRepository = statusRepository;
 		this.jsonMapper = jsonMapper;
 	}
 
@@ -65,10 +70,13 @@ public class ResolutionService {
 		User user = userService.getUserByUsername(login.getName());
 		if (user == null)
 			return null;
-		Status status = new Status();
-		status.setId(StatusEnum.IN_PROGRESS.getId());
+		Optional<Status> status = statusRepository.findByValue(StatusEnum.IN_PROGRESS.getDbValue());
+		if (status.isEmpty()) {
+			logger.error("[RESOLUTION SERVICE] Status wrong defined");
+			return null;
+		}
 		Resolution resolution = new Resolution(user, resolutionDTO.resolution(),
-								resolutionDTO.details(), status);
+								resolutionDTO.details(), status.get());
 		return resolutionRepository.save(resolution);
 	}
 

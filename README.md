@@ -103,7 +103,10 @@ This repository focuses on **backend logic, authentication, and infrastructure m
 | POST   | /auth/login | Authenticate user and create a cookie with a JWT within it |
 | POST   | /auth/logout | Delete the cookies which authenticates the user |
 | POST   | /refresh | Create a new access cookie using the refresh cookie |
-
+| GET   | /api/resolutions | Get the resolutions of the authenticated user |
+| POST   | /api/resolutions | Create a resolution of the authenticated user |
+| PATCH   | /api/resolutions/{resolutionId} | Modify the resolution given as id |
+| DELETE   | /api/resolutions/{resolutionId} | Delete the resolution given as id |
 **In development...**
 
 ---

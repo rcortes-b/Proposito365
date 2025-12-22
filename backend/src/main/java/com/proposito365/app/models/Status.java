@@ -19,10 +19,6 @@ public class Status {
 
 	public Status() {}
 
-	public Status(String value) {
-		
-	}
-
 	public Long getId() {
 		return id;
 	}

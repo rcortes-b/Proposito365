@@ -1,13 +1,12 @@
 package com.proposito365.app.domain;
 
-public enum StatusEnum {
-	IN_PROGRESS("In progress"),
-    COMPLETED("Completed"),
-	FAILED("Failed");
+public enum RolesEnum {
+	MEMBER("member"),
+    ADMIN("admin");
 
     private final String dbValue;
 
-    StatusEnum(String dbValue) {
+    RolesEnum(String dbValue) {
         this.dbValue = dbValue;
     }
 
