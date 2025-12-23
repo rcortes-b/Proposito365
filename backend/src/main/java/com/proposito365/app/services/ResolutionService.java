@@ -10,9 +10,9 @@ import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
 import com.proposito365.app.controller.ResolutionController;
-import com.proposito365.app.domain.ResolutionGetDTO;
-import com.proposito365.app.domain.ResolutionPostDTO;
-import com.proposito365.app.domain.StatusEnum;
+import com.proposito365.app.dto.ResolutionGetDTO;
+import com.proposito365.app.dto.ResolutionPostDTO;
+import com.proposito365.app.dto.StatusEnum;
 import com.proposito365.app.models.Resolution;
 import com.proposito365.app.models.Status;
 import com.proposito365.app.models.User;

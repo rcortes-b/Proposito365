@@ -2,8 +2,8 @@ package com.proposito365.app.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.proposito365.app.domain.ResolutionGetDTO;
-import com.proposito365.app.domain.ResolutionPostDTO;
+import com.proposito365.app.dto.ResolutionGetDTO;
+import com.proposito365.app.dto.ResolutionPostDTO;
 import com.proposito365.app.models.Resolution;
 import com.proposito365.app.services.ResolutionService;
 

@@ -28,6 +28,9 @@ public class User {
 	@Column(name="password")
 	private String password;
 
+	@Column(name = "is_verified")
+	private boolean isVerified;
+
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UserGroup> groups;
 	
@@ -73,6 +76,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public boolean isVerified() {
+		return isVerified;
+	}
+
+	public void setVerified(boolean isVerified) {
+		this.isVerified = isVerified;
 	}
 
 	public Set<UserGroup> getGroups() {

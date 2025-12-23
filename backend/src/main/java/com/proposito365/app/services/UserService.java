@@ -1,15 +1,14 @@
 package com.proposito365.app.services;
 
 import java.security.Principal;
-import java.util.Map;
 import java.util.Optional;
 
 import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.proposito365.app.domain.RolesEnum;
-import com.proposito365.app.domain.UserDTO;
+import com.proposito365.app.dto.RolesEnum;
+import com.proposito365.app.dto.UserDTO;
 import com.proposito365.app.models.Group;
 import com.proposito365.app.models.Roles;
 import com.proposito365.app.models.User;
@@ -19,9 +18,6 @@ import com.proposito365.app.repository.GroupRepository;
 import com.proposito365.app.repository.RolesRepository;
 import com.proposito365.app.repository.UserGroupRepository;
 import com.proposito365.app.repository.UserRepository;
-
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /*
 	- /api/users GET -> Get the user profile
@@ -39,16 +35,13 @@ public class UserService {
 	private GroupRepository groupRepository;
 	private RolesRepository rolesRepository;
 	private UserGroupRepository userGroupRepository;
-	private JsonMapper jsonMapper;
 
 	public UserService(UserRepository userRepository, GroupRepository groupRepository, 
-						RolesRepository rolesRepository, UserGroupRepository userGroupRepository,
-								JsonMapper jsonMapper) {
+						RolesRepository rolesRepository, UserGroupRepository userGroupRepository) {
 		this.userRepository = userRepository;
 		this.groupRepository = groupRepository;
 		this.rolesRepository = rolesRepository;
 		this.userGroupRepository = userGroupRepository;
-		this.jsonMapper = jsonMapper;
 	}
 	
 	public User getUserByUsername(String userName) {
@@ -66,19 +59,18 @@ public class UserService {
 		return new UserDTO(userInfo.getEmail(), userInfo.getUsername());
 	}
 
-	public User updateUserInfo(Map<String, Object> patchPayload, Principal user) {
+	public User updateUsername(String username, Principal user) {
 		User userInfo = getUserByUsername(user.getName());
 		if (userInfo == null)
 			return null;
-		if (patchPayload.containsKey("id"))
-			return null;
-		if (patchPayload.containsKey("email"))
-			logger.info("[USER SERVICE] Validate email!!!");
-
-		User newUser = applyPatch(patchPayload, userInfo);
+		Optional<User> newUser = userRepository.findByUsername(username);
+		if (newUser.isEmpty()) {
+			userInfo.setUsername(username);
+			userRepository.save(userInfo);
+		}
 		logger.info("[USER SERVICE] If the username is modified, cookies must be updated!");
-		userRepository.save(newUser);
-		return newUser;
+		// I want to return null if the username already exists so it cannot be updated (should throw exception if isEmpty == false)
+		return newUser.isEmpty() ? userInfo : null;
 	}
 
 	public User deleteUser(Principal user) {
@@ -123,13 +115,4 @@ public class UserService {
 		userGroupRepository.delete(userGroup.get());
 		return userGroup.get();
 	}
-
-	private User applyPatch(Map<String, Object> patchPayload, User user) {
-		ObjectNode objNode = jsonMapper.convertValue(user, ObjectNode.class);
-		ObjectNode patchNode = jsonMapper.convertValue(patchPayload, ObjectNode.class);
-		
-		objNode.setAll(patchNode);
-		return jsonMapper.convertValue(objNode, User.class);
-	}
-
 }

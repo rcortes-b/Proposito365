@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
 import com.proposito365.app.middleware.auth.utils.CookieProperties;
+import com.proposito365.app.verification.EmailVerificationService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,15 +25,21 @@ public class AuthController {
 	private static final Logger logger = Logger.getLogger(AuthController.class);
 	private AuthService authService;
 	private CookieProperties cookieProperties;
+	private EmailVerificationService emailVerificationService;
 
-	public AuthController(AuthService authService, CookieProperties cookieProperties) {
+	public AuthController(AuthService authService, CookieProperties cookieProperties,
+							EmailVerificationService emailVerificationService) {
 		this.authService = authService;
 		this.cookieProperties = cookieProperties;
+		this.emailVerificationService = emailVerificationService;
 	}
 	
 	@PostMapping("/auth/register")
 	public void createUser(@RequestBody @Valid RegisterRequestDTO registerRequestDTO, HttpServletResponse response) {
 		authService.createUser(registerRequestDTO);
+		final String email = registerRequestDTO.email();
+		final String code =  emailVerificationService.generateToken(email);
+		emailVerificationService.sendVerificationEmail(email, code);
 	}
 
 	@PostMapping("/auth/login")

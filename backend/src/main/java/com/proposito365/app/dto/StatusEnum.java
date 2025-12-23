@@ -1,4 +1,4 @@
-package com.proposito365.app.domain;
+package com.proposito365.app.dto;
 
 public enum StatusEnum {
 	IN_PROGRESS("In progress"),

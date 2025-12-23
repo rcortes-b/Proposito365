@@ -107,6 +107,9 @@ This repository focuses on **backend logic, authentication, and infrastructure m
 | POST   | /api/resolutions | Create a resolution of the authenticated user |
 | PATCH   | /api/resolutions/{resolutionId} | Modify the resolution given as id |
 | DELETE   | /api/resolutions/{resolutionId} | Delete the resolution given as id |
+| PATCH   | /api/users/change-username | Change the username of the logged user |
+| GET   | /api/email-validation | Validates that the email doesn't exist and generate email code |
+| POST   | /api/email-verification | Checks that the code is not expired and is the expected code. Update the database |
 **In development...**
 
 ---

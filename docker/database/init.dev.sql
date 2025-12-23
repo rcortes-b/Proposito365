@@ -10,14 +10,22 @@ CREATE TABLE users (
 	`username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
     `password` VARCHAR(60) NOT NULL, -- This is for bcrypt
+	`is_verified` BOOLEAN NOT NULL,
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
 );
 
 INSERT INTO users (`id`, `email`, `username`, `password`) VALUES 
 (1, 'raulcortes6@gmail.com', 'Raul', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W'), 
 (2, 'csraulcb@gmail.com', 'Raul2', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W'), 
 (3, 'raulcortes.dev@gmail.com', 'Raul3', '$2a$10$LI6Say13zFZaURamVvvkzeUZG8QXwLgQ5c4KAAxthTYOXpVXPv77W');  
+
+CREATE TABLE email_verification (
+	`id` int AUTO_INCREMENT PRIMARY KEY,
+	`email` VARCHAR(255) UNIQUE NOT NULL,
+	`token` VARCHAR(6) NOT NULL,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`expires_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 15 MINUTE),
+);
 
 CREATE TABLE groups_table (
 	`id` int AUTO_INCREMENT PRIMARY KEY,
