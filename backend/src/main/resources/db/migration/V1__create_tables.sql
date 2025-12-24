@@ -10,6 +10,7 @@ CREATE TABLE users (
 	`username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
     `password` VARCHAR(60) NOT NULL, -- This is for bcrypt
+	`is_verified` BOOLEAN,
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
@@ -20,6 +21,14 @@ CREATE TABLE groups_table (
 	`description` VARCHAR(255), -- A group description must not be more than 255 characters
 	`capacity` int NOT NULL CHECK (capacity > 0 AND capacity <= 100), -- A group capacity must be maximum 20 users
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE email_verification (
+	`id` int AUTO_INCREMENT PRIMARY KEY,
+	`email` VARCHAR(255) UNIQUE NOT NULL,
+	`token` VARCHAR(6) NOT NULL,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`expires_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 15 MINUTE)
 );
 
 CREATE TABLE resolution_status (

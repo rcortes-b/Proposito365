@@ -10,7 +10,7 @@ CREATE TABLE users (
 	`username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
     `password` VARCHAR(60) NOT NULL, -- This is for bcrypt
-	`is_verified` BOOLEAN NOT NULL,
+	`is_verified` BOOLEAN,
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -24,7 +24,7 @@ CREATE TABLE email_verification (
 	`email` VARCHAR(255) UNIQUE NOT NULL,
 	`token` VARCHAR(6) NOT NULL,
 	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	`expires_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 15 MINUTE),
+	`expires_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 15 MINUTE)
 );
 
 CREATE TABLE groups_table (

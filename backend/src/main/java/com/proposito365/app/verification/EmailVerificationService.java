@@ -5,9 +5,8 @@ import java.security.Principal;
 import com.proposito365.app.dto.EmailVerificationDTO;
 
 public interface EmailVerificationService {
-	boolean isEmailValid(String email);
+	void validateEmail(String email);
 	String generateToken(String email);
 	void sendVerificationEmail(String toEmail, String code);
-	EmailVerification validateEmail(EmailVerificationDTO emailVerificationDTO, Principal login);
-	void deleteEmailVerification(Long id);
+	void verificateEmail(EmailVerificationDTO emailVerificationDTO, Principal login);
 }
