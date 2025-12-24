@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,24 +32,28 @@ public class ResolutionController {
 	}
 	
 	@GetMapping
-	public List<ResolutionGetDTO> getUserResolutions(Principal user) {
-		return resolutionService.getUserResolutions(user);
+	public ResponseEntity<List<ResolutionGetDTO>> getUserResolutions(Principal user) {
+		List<ResolutionGetDTO> response = resolutionService.getUserResolutions(user);
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping
-	public void createResolution(Principal user, @RequestBody ResolutionPostDTO resolutionDTO) {
+	public ResponseEntity<Void> createResolution(Principal user, @RequestBody ResolutionPostDTO resolutionDTO) {
 		resolutionService.createResolution(user, resolutionDTO);
+		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("{resolutionId}")
-	public Resolution patchResolution(@PathVariable Long resolutionId, @RequestBody Map<String, Object> patchPayload,
+	public ResponseEntity<Resolution> patchResolution(@PathVariable Long resolutionId, @RequestBody Map<String, Object> patchPayload,
 										Principal user) {
-		return resolutionService.patchResolution(resolutionId, patchPayload, user);
+		Resolution response = resolutionService.patchResolution(resolutionId, patchPayload, user);
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("{resolutionId}")
-	public void deleteResolution(@PathVariable Long resolutionId, Principal user) {
+	public ResponseEntity<Void> deleteResolution(@PathVariable Long resolutionId, Principal user) {
 		resolutionService.deleteResolution(resolutionId, user);
+		return ResponseEntity.ok().build();
 	}
 	
 }

@@ -9,6 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.proposito365.app.dto.RolesEnum;
 import com.proposito365.app.dto.UserDTO;
+import com.proposito365.app.exception.GroupNotFoundException;
+import com.proposito365.app.exception.InvalidUserException;
+import com.proposito365.app.exception.UserGroupRelationException;
+import com.proposito365.app.exception.UserNotFoundException;
 import com.proposito365.app.middleware.auth.AuthService;
 import com.proposito365.app.models.Group;
 import com.proposito365.app.models.Roles;
@@ -51,74 +55,62 @@ public class UserService {
 	public User getUserByUsername(String userName) {
 		Optional<User> user =  userRepository.findByUsernameOrEmail(userName);
 		if (user.isEmpty())
-			return null;
+			throw new UserNotFoundException();
 		return user.get();
 	}
 
 	public UserDTO getUserInfo(Principal user) {
 		User userInfo = getUserByUsername(user.getName());
-		if (userInfo == null)
-			return null;
-
 		return new UserDTO(userInfo.getEmail(), userInfo.getUsername());
 	}
 
 	public User updateUsername(String username, Principal user) {
 		User userInfo = getUserByUsername(user.getName());
-		if (userInfo == null)
-			return null;
 		Optional<User> newUser = userRepository.findByUsername(username);
 		if (newUser.isEmpty()) {
+			throw new InvalidUserException(username + " already exists");
+		} else {
 			userInfo.setUsername(username);
 			userRepository.save(userInfo);
 			authService.updateCurrentUser(userInfo);
 			authService.generateCookies();
 		}
-		logger.info("[USER SERVICE] If the username is modified, cookies must be updated!");
-		// I want to return null if the username already exists so it cannot be updated (should throw exception if isEmpty == false)
-		return newUser.isEmpty() ? userInfo : null;
-	}
-
-	public User deleteUser(Principal user) {
-		User userInfo = getUserByUsername(user.getName());
-		if (userInfo == null)
-			return null;
-		logger.info("[USER SERVICE] Did the CASCADE work for groups/resolutions");
-		userRepository.delete(userInfo);
-		logger.info("[USER SERVICE] Necesito hacer logout automatico? Creo que de eso se encarga el front redirigiendolo!");
 		return userInfo;
 	}
 
-	public UserGroup joinGroup(Long groupId, Principal user) {
+	public void deleteUser(Principal user) {
+		User userInfo = getUserByUsername(user.getName());
+		logger.info("[USER SERVICE] Did the CASCADE work for groups/resolutions");
+		userRepository.delete(userInfo);
+	}
+
+	public Group joinGroup(Long groupId, Principal user) {
 		User userInfo = getUserByUsername(user.getName());
 		Optional<Group> group = groupRepository.findById(groupId);
-		if (userInfo == null || group.isEmpty())
-			return null;
-
+		if (group.isEmpty())
+			throw new GroupNotFoundException();
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUserGroupId(new UserGroupId(userInfo.getId(), groupId));
 		userGroup.setUser(userInfo);
 		userGroup.setGroup(group.get());
 		Optional<Roles> role = rolesRepository.findByRole(RolesEnum.MEMBER.getDbValue());
 		if (role == null) {
-			logger.error("[USER SERVICE] Role wrong definition");
-			return null;
+			/* This is a checker to know if this well defined because it is not TESTED !!! */
+			logger.error("[USER SERVICE] Role wrong definition --- PERSONAL CHECKER");
+			throw new RuntimeException();
 		}
 		userGroup.setRole(role.get());
-		return userGroup;
+		return group.get();
 	}
 
-	public UserGroup leaveGroup(Long groupId, Principal user) {
+	public void leaveGroup(Long groupId, Principal user) {
 		User userInfo = getUserByUsername(user.getName());
 		Optional<Group> group = groupRepository.findById(groupId);
-		if (userInfo == null || group.isEmpty())
-			return null;
+		if (group.isEmpty())
+			throw new GroupNotFoundException();
 		Optional<UserGroup> userGroup = userGroupRepository.findByUserAndGroup(userInfo, group.get());
-		if (userGroup.isEmpty()) {
-			logger.error("[USER SERVICE] User-Group relation does not exist");
-			return null;
-		}
+		if (userGroup.isEmpty())
+			throw new UserGroupRelationException();
 		userGroupRepository.delete(userGroup.get());
-		return userGroup.get();
 	}
 }

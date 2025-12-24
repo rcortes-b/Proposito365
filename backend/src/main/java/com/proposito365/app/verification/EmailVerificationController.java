@@ -3,7 +3,6 @@ package com.proposito365.app.verification;
 import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,7 @@ public class EmailVerificationController {
 		this.emailVerificationService = emailVerificationService;
 	}
 
-	@GetMapping("/email-validation")
+	@PostMapping("/email-validation")
 	public ResponseEntity<Void> handleEmailValidation(@RequestParam String email) {
 		emailVerificationService.validateEmail(email);
 		final String code =  emailVerificationService.generateToken(email);

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.BadRequestException;
 import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import com.proposito365.app.controller.ResolutionController;
 import com.proposito365.app.dto.ResolutionGetDTO;
 import com.proposito365.app.dto.ResolutionPostDTO;
 import com.proposito365.app.dto.StatusEnum;
+import com.proposito365.app.exception.BadRequestCustomException;
+import com.proposito365.app.exception.ResolutionNotFoundException;
 import com.proposito365.app.models.Resolution;
 import com.proposito365.app.models.Status;
 import com.proposito365.app.models.User;
@@ -53,8 +56,6 @@ public class ResolutionService {
 
 	public List<ResolutionGetDTO> getUserResolutions(Principal login) {
 		User user = userService.getUserByUsername(login.getName());
-		if (user == null)
-			return null;
 		List<ResolutionGetDTO> resolutions = user.getResolutions().stream()
 																  .map(r -> new ResolutionGetDTO(
 																	r.getId(),
@@ -66,26 +67,23 @@ public class ResolutionService {
 		return resolutions;					
 	}
 
-	public Resolution createResolution(Principal login, ResolutionPostDTO resolutionDTO) {
+	public void createResolution(Principal login, ResolutionPostDTO resolutionDTO) {
 		User user = userService.getUserByUsername(login.getName());
-		if (user == null)
-			return null;
 		Optional<Status> status = statusRepository.findByValue(StatusEnum.IN_PROGRESS.getDbValue());
 		if (status.isEmpty()) {
-			logger.error("[RESOLUTION SERVICE] Status wrong defined");
-			return null;
+			/* This is a checker to know if this well defined because it is not TESTED !!! */
+			logger.error("[RESOLUTION SERVICE] Status wrong defined --- This is only a personal checker");
+			throw new RuntimeException();
 		}
 		Resolution resolution = new Resolution(user, resolutionDTO.resolution(),
 								resolutionDTO.details(), status.get());
-		return resolutionRepository.save(resolution);
+		resolutionRepository.save(resolution);
 	}
 
 	public Resolution patchResolution(Long resolutionId, Map<String, Object> patchPayload, Principal login) {
 		User user = userService.getUserByUsername(login.getName());
-		if (user == null)
-			return null;
 		if (patchPayload.containsKey("id") || patchPayload.containsKey("user_id"))
-			return null;
+			throw new BadRequestCustomException("BAD_REQUEST", "Resolution and user ids cannot be modified");
 		Resolution patchedResolution = null;
 		for (Resolution r : user.getResolutions()) {
 			if (r.getId() == resolutionId)
@@ -95,15 +93,14 @@ public class ResolutionService {
 				break;
 			}
 		}
-		if (patchedResolution != null)
-			resolutionRepository.save(patchedResolution);
+		if (patchedResolution == null)
+			throw new ResolutionNotFoundException();
+		resolutionRepository.save(patchedResolution);
 		return patchedResolution;
 	}
 
-	public Resolution deleteResolution(Long resolutionId, Principal login) {
+	public void deleteResolution(Long resolutionId, Principal login) {
 		User user = userService.getUserByUsername(login.getName());
-		if (user == null)
-			return null;
 		Resolution resolution = null;
 		for (Resolution r : user.getResolutions()) {
 			if ( r.getId() == resolutionId)
@@ -112,9 +109,9 @@ public class ResolutionService {
 				break;
 			}
 		}
-		if (resolution != null)
-			resolutionRepository.delete(resolution);
-		return resolution;
+		if (resolution == null)
+			throw new ResolutionNotFoundException();
+		resolutionRepository.delete(resolution);
 	}
 
 	private Resolution applyPatch(Map<String, Object> patchPayload, Resolution resolution) {

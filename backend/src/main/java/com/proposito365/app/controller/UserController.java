@@ -2,6 +2,8 @@ package com.proposito365.app.controller;
 
 import java.security.Principal;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.dto.UserDTO;
+import com.proposito365.app.models.Group;
 import com.proposito365.app.models.User;
-import com.proposito365.app.models.UserGroup;
 import com.proposito365.app.services.UserService;
 
 @RestController
@@ -26,28 +28,34 @@ public class UserController {
 	}
 
 	@GetMapping
-	public UserDTO getUserInfo(Principal user) {
-		return userService.getUserInfo(user);
+	public ResponseEntity<UserDTO> getUserInfo(Principal user) {
+		UserDTO response = userService.getUserInfo(user);
+		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/change-username")
-	public User updateUserInfo(@RequestParam String username, Principal user) {
-		return userService.updateUsername(username, user);
+	public ResponseEntity<User> updateUserInfo(@RequestParam String username, Principal user) {
+		User response = userService.updateUsername(username, user);
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping
-	public User deleteUser(Principal user) {
-		return userService.deleteUser(user);
+	public ResponseEntity<Void> deleteUser(Principal user, Authentication authentication) {
+		userService.deleteUser(user);
+		/* Delete cookies!!!!!!!!!! */
+		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/{groupId}/join")
-	public UserGroup joinGroup(@PathVariable Long groupId, Principal user) {
-		return userService.joinGroup(groupId, user);
+	public ResponseEntity<Group> joinGroup(@PathVariable Long groupId, Principal user) {
+		Group group = userService.joinGroup(groupId, user);
+		return ResponseEntity.ok(group);
 	}
 
 	@PostMapping("/{groupId}/leave")
-	public UserGroup leaveGroup(@PathVariable Long groupId, Principal user) {
-		return userService.leaveGroup(groupId, user);
+	public ResponseEntity<Void> leaveGroup(@PathVariable Long groupId, Principal user) {
+		userService.leaveGroup(groupId, user);
+		return ResponseEntity.ok().build();
 	}
 	
 }
