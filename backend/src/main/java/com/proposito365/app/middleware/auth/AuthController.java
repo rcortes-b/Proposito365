@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
-import com.proposito365.app.middleware.auth.utils.CookieProperties;
 import com.proposito365.app.verification.EmailVerificationService;
 
 import jakarta.servlet.http.Cookie;
@@ -24,13 +23,10 @@ import jakarta.validation.Valid;
 public class AuthController {
 	private static final Logger logger = Logger.getLogger(AuthController.class);
 	private AuthService authService;
-	private CookieProperties cookieProperties;
 	private EmailVerificationService emailVerificationService;
 
-	public AuthController(AuthService authService, CookieProperties cookieProperties,
-							EmailVerificationService emailVerificationService) {
+	public AuthController(AuthService authService, EmailVerificationService emailVerificationService) {
 		this.authService = authService;
-		this.cookieProperties = cookieProperties;
 		this.emailVerificationService = emailVerificationService;
 	}
 	
@@ -44,13 +40,8 @@ public class AuthController {
 
 	@PostMapping("/auth/login")
 	public void login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
-		Authentication authentication = authService.login(loginRequestDTO);
-		final String accessToken = authService.generateToken(authentication, false);
-		final String refreshToken = authService.generateToken(authentication, true);
-		final Cookie cookie = createAuthCookie(accessToken, false);
-		final Cookie cookieRefresh = createAuthCookie(refreshToken, true);
-		response.addCookie(cookie);
-		response.addCookie(cookieRefresh);
+		authService.login(loginRequestDTO);
+		authService.generateCookies();
 	}
 
 	/* Creates a new cookie with the same name and sets it to empty and expired
@@ -58,9 +49,8 @@ public class AuthController {
 	*/
 	@PostMapping("/auth/logout")
 	public void logout(HttpServletResponse response) {
-		logger.info("LLEGO???");
-		final Cookie cookie = createAuthCookie("", false);
-		final Cookie cookieRefresh = createAuthCookie("", true);
+		final Cookie cookie = authService.createAuthCookie("", false);
+		final Cookie cookieRefresh = authService.createAuthCookie("", true);
 		cookie.setMaxAge(0);
 		cookieRefresh.setMaxAge(0);
 		response.addCookie(cookie);
@@ -73,7 +63,7 @@ public class AuthController {
 		UserSecurity userSecurity = (UserSecurity)authentication.getPrincipal();
 		logger.info("[REFRESH]" + userSecurity.getUsername());
 		final String accessToken = authService.generateToken(authentication, false);
-		Cookie cookie = createAuthCookie(accessToken, false);
+		Cookie cookie = authService.createAuthCookie(accessToken, false);
 		response.addCookie(cookie);
 		/*
 			General idea: authService validate, the authService inspect the 
@@ -82,19 +72,4 @@ public class AuthController {
 			then generateToken based in the username.
 		*/
 	}
-	
-	private Cookie createAuthCookie(String token, boolean isRefresh) {
-		logger.info("[COOKIE INFO]: " + cookieProperties.toString() + "      " + token);
-        final String SAME_SITE_KEY = "SameSite";
-		final String name = isRefresh == true ? cookieProperties.getNameRefresh() : cookieProperties.getName();
-		final int max_age = (int)(isRefresh == true ? cookieProperties.getMaxAgeRefresh()
-								: cookieProperties.getMaxAge()).getSeconds();
-        final Cookie cookie = new Cookie(name, token);
-        cookie.setHttpOnly(cookieProperties.isHttpOnly());
-        cookie.setSecure(cookieProperties.isSecure());
-		cookie.setPath("/");
-        cookie.setMaxAge(max_age);
-        cookie.setAttribute(SAME_SITE_KEY, cookieProperties.getSameSite());
-        return cookie;
-    }
 }

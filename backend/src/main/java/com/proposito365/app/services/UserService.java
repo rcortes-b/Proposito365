@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.proposito365.app.dto.RolesEnum;
 import com.proposito365.app.dto.UserDTO;
+import com.proposito365.app.middleware.auth.AuthService;
 import com.proposito365.app.models.Group;
 import com.proposito365.app.models.Roles;
 import com.proposito365.app.models.User;
@@ -35,13 +36,16 @@ public class UserService {
 	private GroupRepository groupRepository;
 	private RolesRepository rolesRepository;
 	private UserGroupRepository userGroupRepository;
+	private AuthService authService;
 
 	public UserService(UserRepository userRepository, GroupRepository groupRepository, 
-						RolesRepository rolesRepository, UserGroupRepository userGroupRepository) {
+						RolesRepository rolesRepository, UserGroupRepository userGroupRepository,
+							AuthService authService) {
 		this.userRepository = userRepository;
 		this.groupRepository = groupRepository;
 		this.rolesRepository = rolesRepository;
 		this.userGroupRepository = userGroupRepository;
+		this.authService = authService;
 	}
 	
 	public User getUserByUsername(String userName) {
@@ -67,6 +71,8 @@ public class UserService {
 		if (newUser.isEmpty()) {
 			userInfo.setUsername(username);
 			userRepository.save(userInfo);
+			authService.updateCurrentUser(userInfo);
+			authService.generateCookies();
 		}
 		logger.info("[USER SERVICE] If the username is modified, cookies must be updated!");
 		// I want to return null if the username already exists so it cannot be updated (should throw exception if isEmpty == false)

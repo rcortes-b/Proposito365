@@ -7,13 +7,20 @@ import java.util.Optional;
 import org.jboss.logging.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
@@ -34,14 +41,16 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	private UserRepository userRepository;
 	private TokenService tokenService;
 	private PasswordEncoder passwordEncoder;
+	private CookieProperties cookieProperties;
 	private AuthenticationConfiguration authenticationConfiguration;
 
 	public AuthServiceImpl(UserRepository userRepository, TokenService tokenService,
-							PasswordEncoder passwordEncoder,
+							PasswordEncoder passwordEncoder, CookieProperties cookieProperties,
 								AuthenticationConfiguration authenticationConfiguration) {
 		this.userRepository = userRepository;
 		this.tokenService = tokenService;
 		this.passwordEncoder = passwordEncoder;
+		this.cookieProperties = cookieProperties;
 		this.authenticationConfiguration = authenticationConfiguration;
 	} 
 
@@ -49,6 +58,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	public void createUser(final RegisterRequestDTO createUserDto) {
 		final User newUser = AuthMapper.fromDto(createUserDto);
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+		newUser.setVerified(false);
 		final User finalUser = userRepository.save(newUser);
 		logger.info("[USER] : User successfully created with id " + finalUser.getId());
 	}
@@ -123,6 +133,47 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	}
 
 	@Override
+	public void generateCookies() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		HttpServletResponse response = attrs.getResponse();
+
+		final String accessToken = generateToken(authentication, false);
+		final String refreshToken = generateToken(authentication, true);
+		final Cookie cookie = createAuthCookie(accessToken, false);
+		final Cookie cookieRefresh = createAuthCookie(refreshToken, true);
+		response.addCookie(cookie);
+		response.addCookie(cookieRefresh);
+	}
+
+	@Override
+	public Cookie createAuthCookie(String token, boolean isRefresh) {
+		logger.info("[COOKIE INFO]: " + cookieProperties.toString() + "      " + token);
+        final String SAME_SITE_KEY = "SameSite";
+		final String name = isRefresh == true ? cookieProperties.getNameRefresh() : cookieProperties.getName();
+		final int max_age = (int)(isRefresh == true ? cookieProperties.getMaxAgeRefresh()
+								: cookieProperties.getMaxAge()).getSeconds();
+        final Cookie cookie = new Cookie(name, token);
+        cookie.setHttpOnly(cookieProperties.isHttpOnly());
+        cookie.setSecure(cookieProperties.isSecure());
+		cookie.setPath("/");
+        cookie.setMaxAge(max_age);
+        cookie.setAttribute(SAME_SITE_KEY, cookieProperties.getSameSite());
+        return cookie;
+    }
+
+	@Override
+	public void updateCurrentUser(User updatedUser) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Authentication newAuth = new UsernamePasswordAuthenticationToken(
+				updatedUser, 
+				auth.getCredentials(), 
+				null
+		);
+		SecurityContextHolder.getContext().setAuthentication(newAuth);
+	}
+
+	@Override
 	public UserDetails loadUserById(Long id) {
 		logger.info("VA LOKO  " + id);
 		Optional<User> user = userRepository.findById(id);
@@ -131,6 +182,5 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 			logger.error("[USER] : User not found with id: " + id + " --- Remember add the Exception 3!!!");
 		logger.info("[USER] : User successfully obtained with username " + user.get().getUsername());
 		return new UserSecurity(user.get());
-	} 
-	
+	}
 }

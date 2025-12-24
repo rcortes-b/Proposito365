@@ -7,6 +7,7 @@ import com.proposito365.app.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.middleware.auth.dto.RegisterRequestDTO;
 import com.proposito365.app.models.User;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -19,4 +20,7 @@ public interface AuthService {
 	String generateToken(Authentication authentication, boolean isRefresh);
 	void validateRefreshCookie(HttpServletRequest request, HttpServletResponse response);
 	UserDetails loadUserById(Long id);
+	void generateCookies();
+	void updateCurrentUser(User updatedUser);
+	Cookie createAuthCookie(String token, boolean isRefresh);
 }
