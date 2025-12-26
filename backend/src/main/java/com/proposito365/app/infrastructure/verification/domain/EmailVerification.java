@@ -1,4 +1,4 @@
-package com.proposito365.app.infrastructure.verification;
+package com.proposito365.app.infrastructure.verification.domain;
 
 import java.sql.Timestamp;
 

@@ -1,4 +1,6 @@
-package com.proposito365.app.infrastructure.verification;
+package com.proposito365.app.infrastructure.verification.service;
+
+import com.proposito365.app.infrastructure.verification.domain.EmailVerificationDTO;
 
 public interface EmailVerificationService {
 	void validateEmail(String email);

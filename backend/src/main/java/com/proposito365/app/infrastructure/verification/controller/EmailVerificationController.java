@@ -1,4 +1,4 @@
-package com.proposito365.app.infrastructure.verification;
+package com.proposito365.app.infrastructure.verification.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,10 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/*
-	An exception is thrown if the request is invalid
-	The error codes are in the README.md / ERROR_CODES.md
-*/
+import com.proposito365.app.infrastructure.verification.domain.EmailVerificationDTO;
+import com.proposito365.app.infrastructure.verification.service.EmailVerificationService;
 
 @RestController
 @RequestMapping("/api")

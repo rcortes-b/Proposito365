@@ -5,8 +5,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.proposito365.app.common.exceptions.verification.InvalidEmailException;
+import com.proposito365.app.common.exceptions.verification.InvalidTokenException;
+import com.proposito365.app.common.exceptions.verification.TokenExpiredException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	/* Verification Exceptions */
+
+	@ExceptionHandler(InvalidEmailException.class)
+	public ResponseEntity<ApiError> handleInvalidEmail(InvalidEmailException ex) {
+		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+	@ExceptionHandler(TokenExpiredException.class)
+	public ResponseEntity<ApiError> handleTokenExpired(TokenExpiredException ex) {
+		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.GONE);
+    }
+
+	@ExceptionHandler(InvalidTokenException.class)
+	public ResponseEntity<ApiError> handleInvalidToken(InvalidTokenException ex) {
+		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
 
 	/* Custom Global Exceptions */
 
@@ -69,14 +93,6 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(UserGroupRelationException.class)
     public ResponseEntity<ApiError> handleUserGroupRelation(UserGroupRelationException ex) {
 		ApiError apiError = new ApiError("INVALID_RELATION", "User don't belong to the specified group");
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
-
-	/* EmailVerification Exceptions */
-
-	@ExceptionHandler(InvalidEmailException.class)
-	public ResponseEntity<ApiError> handleInvalidEmail(InvalidEmailException ex) {
-		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }

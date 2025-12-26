@@ -1,4 +1,4 @@
-package com.proposito365.app.infrastructure.verification;
+package com.proposito365.app.infrastructure.verification.service;
 
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -8,10 +8,16 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.proposito365.app.common.exceptions.InvalidEmailException;
+import com.proposito365.app.common.exceptions.verification.InvalidEmailException;
+import com.proposito365.app.common.exceptions.verification.InvalidTokenException;
+import com.proposito365.app.common.exceptions.verification.TokenExpiredException;
 import com.proposito365.app.domain.users.domain.User;
 import com.proposito365.app.domain.users.service.UserService;
 import com.proposito365.app.infrastructure.middleware.auth.AuthService;
+import com.proposito365.app.infrastructure.verification.domain.EmailVerification;
+import com.proposito365.app.infrastructure.verification.domain.EmailVerificationDTO;
+import com.proposito365.app.infrastructure.verification.domain.VerificationCodeGenerator;
+import com.proposito365.app.infrastructure.verification.repository.EmailVerificationRepository;
 
 @Service
 public class EmailVerificationServiceImpl implements EmailVerificationService {
@@ -36,7 +42,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 	public void validateEmail(String email) {
 		Optional<User> user = userService.getUserByEmail(email);
 		if (user.isEmpty() == false)
-			throw new InvalidEmailException("INVALID_EMAIL", "Email already exists");
+			throw new InvalidEmailException();
 	}
 
 	@Override
@@ -72,17 +78,18 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
 	@Override
 	public void verificateEmail(EmailVerificationDTO emailVerificationDTO) {
-		EmailVerification emailVerification = emailVerificationRepository.findByEmail(emailVerificationDTO.email())
-		.orElseThrow(() -> new InvalidEmailException("EMAIL_NOT_VALID", "This email doesn't need to be verified"));
+		EmailVerification emailVerification = emailVerificationRepository
+											  .findByEmail(emailVerificationDTO.email())
+											  .orElseThrow(InvalidEmailException::new);
 
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		if (timestamp.after(emailVerification.getExpiresAt())) {
 			emailVerificationRepository.delete(emailVerification);
-			throw new InvalidEmailException("TOKEN_EXPIRED", "The verification code has expired");
+			throw new TokenExpiredException();
 		}
 
 		if (emailVerificationDTO.token() != emailVerification.getToken())
-			throw new InvalidEmailException("INVALID_TOKEN", "The verification code doesn't match");
+			throw new InvalidTokenException();
 
 		Optional<User> user = userService.getUserByEmail(emailVerificationDTO.email());
 		if (user.isEmpty() == false) {

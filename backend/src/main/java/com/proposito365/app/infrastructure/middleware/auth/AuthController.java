@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.infrastructure.middleware.auth.dto.LoginRequestDTO;
 import com.proposito365.app.infrastructure.middleware.auth.dto.RegisterRequestDTO;
-import com.proposito365.app.infrastructure.verification.EmailVerificationService;
+import com.proposito365.app.infrastructure.verification.service.EmailVerificationService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
