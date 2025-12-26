@@ -9,7 +9,7 @@ import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
 import com.proposito365.app.common.exceptions.BadRequestCustomException;
-import com.proposito365.app.common.exceptions.ResolutionNotFoundException;
+import com.proposito365.app.common.exceptions.resolutions.ResolutionNotFoundException;
 import com.proposito365.app.domain.resolutions.controller.ResolutionController;
 import com.proposito365.app.domain.resolutions.domain.Resolution;
 import com.proposito365.app.domain.resolutions.domain.ResolutionGetDTO;
@@ -66,19 +66,6 @@ public class ResolutionService {
 		return resolutions;
 	}
 
-	public List<ResolutionGetDTO> getUserResolutions() {
-		User user = authService.getAuthenticatedUser();
-		List<ResolutionGetDTO> resolutions = user.getResolutions().stream()
-																  .map(r -> new ResolutionGetDTO(
-																	   r.getId(),
-																	   r.getResolution(),
-																	   r.getDetails(),
-																	   r.getStatus().getValue()
-																  	   ))
-																  .collect(Collectors.toList());
-		return resolutions;					
-	}
-
 	public void createResolution(ResolutionPostDTO resolutionDTO) {
 		User user = authService.getAuthenticatedUser();
 		Optional<Status> status = statusRepository.findByValue(StatusEnum.IN_PROGRESS.getDbValue());
@@ -94,7 +81,7 @@ public class ResolutionService {
 	public Resolution patchResolution(Long resolutionId, Map<String, Object> patchPayload) {
 		User user = authService.getAuthenticatedUser();
 		if (patchPayload.containsKey("id") || patchPayload.containsKey("user_id"))
-			throw new BadRequestCustomException("BAD_REQUEST", "Resolution and user ids cannot be modified");
+			throw new BadRequestCustomException("INVALID_REQUEST", "Resolution and user ids cannot be modified");
 		Resolution patchedResolution = null;
 		for (Resolution r : user.getResolutions()) {
 			if (r.getId() == resolutionId)

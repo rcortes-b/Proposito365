@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.proposito365.app.common.exceptions.UserNotFoundException;
+import com.proposito365.app.common.exceptions.users.UserNotFoundException;
 import com.proposito365.app.domain.users.domain.User;
 import com.proposito365.app.domain.users.repository.UserRepository;
 import com.proposito365.app.infrastructure.middleware.auth.dto.LoginRequestDTO;

@@ -5,6 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.proposito365.app.common.exceptions.groups.GroupFullCapacityException;
+import com.proposito365.app.common.exceptions.groups.GroupNotFoundException;
+import com.proposito365.app.common.exceptions.groups.InvalidGroupAdminException;
+import com.proposito365.app.common.exceptions.groups.UserGroupRelationException;
+import com.proposito365.app.common.exceptions.resolutions.ResolutionNotFoundException;
+import com.proposito365.app.common.exceptions.users.InvalidPasswordException;
+import com.proposito365.app.common.exceptions.users.InvalidUserException;
+import com.proposito365.app.common.exceptions.users.UserNotFoundException;
 import com.proposito365.app.common.exceptions.verification.InvalidEmailException;
 import com.proposito365.app.common.exceptions.verification.InvalidTokenException;
 import com.proposito365.app.common.exceptions.verification.TokenExpiredException;
@@ -32,13 +40,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-	/* Custom Global Exceptions */
 
-	@ExceptionHandler(BadRequestCustomException.class)
-	public ResponseEntity<ApiError> handleBadRequestException(BadRequestCustomException ex) {
-		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-	}
 
 	/* User Exceptions */
 
@@ -60,6 +62,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+
+
+
+
 	/* Group Exceptions */
 
 	@ExceptionHandler(GroupNotFoundException.class)
@@ -71,7 +77,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(InvalidGroupAdminException.class)
     public ResponseEntity<ApiError> handleInvalidGroupAdmin(InvalidGroupAdminException ex) {
 		ApiError apiError = new ApiError("INVALID_ADMIN", ex.getMessage());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 
 	@ExceptionHandler(GroupFullCapacityException.class)
@@ -93,6 +99,20 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(UserGroupRelationException.class)
     public ResponseEntity<ApiError> handleUserGroupRelation(UserGroupRelationException ex) {
 		ApiError apiError = new ApiError("INVALID_RELATION", "User don't belong to the specified group");
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
+
+	/* Custom Global Exceptions */
+
+	@ExceptionHandler(BadRequestCustomException.class)
+	public ResponseEntity<ApiError> handleBadRequestException(BadRequestCustomException ex) {
+		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ForbiddenCustomException.class)
+	public ResponseEntity<ApiError> handleForbiddenException(ForbiddenCustomException ex) {
+		ApiError apiError = new ApiError(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
+	}
 }

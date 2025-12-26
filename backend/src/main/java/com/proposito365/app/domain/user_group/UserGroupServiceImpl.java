@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
-import com.proposito365.app.common.exceptions.UserGroupRelationException;
+import com.proposito365.app.common.exceptions.groups.UserGroupRelationException;
 import com.proposito365.app.domain.groups.domain.Group;
 import com.proposito365.app.domain.roles.Roles;
 import com.proposito365.app.domain.roles.RolesEnum;

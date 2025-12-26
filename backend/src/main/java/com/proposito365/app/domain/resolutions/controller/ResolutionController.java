@@ -6,6 +6,7 @@ import com.proposito365.app.domain.resolutions.domain.Resolution;
 import com.proposito365.app.domain.resolutions.domain.ResolutionGetDTO;
 import com.proposito365.app.domain.resolutions.domain.ResolutionPostDTO;
 import com.proposito365.app.domain.resolutions.service.ResolutionService;
+import com.proposito365.app.infrastructure.middleware.auth.AuthService;
 
 import java.util.List;
 import java.util.Map;
@@ -24,15 +25,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/resolutions")
 public class ResolutionController {
 	public final static Logger logger = Logger.getLogger(ResolutionController.class);
+	private AuthService authService;
 	private ResolutionService resolutionService;
 
-	public ResolutionController(ResolutionService resolutionService) {
+	public ResolutionController(AuthService authService, ResolutionService resolutionService) {
+		this.authService = authService;
 		this.resolutionService = resolutionService;
 	}
 	
 	@GetMapping
 	public ResponseEntity<List<ResolutionGetDTO>> getUserResolutions() {
-		List<ResolutionGetDTO> response = resolutionService.getUserResolutions();
+		List<ResolutionGetDTO> response = resolutionService.getUserResolutions(authService.getAuthenticatedUser());
 		return ResponseEntity.ok(response);
 	}
 

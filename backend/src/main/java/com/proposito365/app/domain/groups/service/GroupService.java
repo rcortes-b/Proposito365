@@ -8,9 +8,10 @@ import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
 import com.proposito365.app.common.exceptions.BadRequestCustomException;
-import com.proposito365.app.common.exceptions.GroupFullCapacityException;
-import com.proposito365.app.common.exceptions.GroupNotFoundException;
-import com.proposito365.app.common.exceptions.InvalidGroupAdminException;
+import com.proposito365.app.common.exceptions.ForbiddenCustomException;
+import com.proposito365.app.common.exceptions.groups.GroupFullCapacityException;
+import com.proposito365.app.common.exceptions.groups.GroupNotFoundException;
+import com.proposito365.app.common.exceptions.groups.InvalidGroupAdminException;
 import com.proposito365.app.domain.groups.domain.Group;
 import com.proposito365.app.domain.groups.domain.GroupCreationDTO;
 import com.proposito365.app.domain.groups.domain.GroupDataDTO;
@@ -52,12 +53,11 @@ public class GroupService {
 		this.jsonMapper = jsonMapper;
 	}
 
-	// /api/groups GET -> Get all the groups that a user is participant
 	public List<Group> getListOfGroups() {
 		User user = authService.getAuthenticatedUser();
 		return userGroupService.getGroups(user);
 	}
-	// /api/groups POST -> Create a new group (user will be admin)
+
 	public Group createGroup(GroupCreationDTO groupCreationDTO) {
 		User user = authService.getAuthenticatedUser();
 		Group group = new Group();
@@ -73,7 +73,7 @@ public class GroupService {
 		userGroupService.createNewRelation(user, group, role.get());
 		return group;
 	}
-	// /api/groups/{groupId} PATCH -> Update the group by id (user must be the admin). it may be the group name/description/capacity
+
 	public Group updateGroupInfo(Long groupId, Map<String, Object> patchPayload) {
 		User user = authService.getAuthenticatedUser();
 		Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
@@ -86,7 +86,7 @@ public class GroupService {
 		groupRepository.save(group);
 		return group;
 	}
-	// /api/groups/{groupId} DELETE -> Delete the group by id (user must be the admin)
+
 	public void deleteGroup(Long groupId) {
 		User user = authService.getAuthenticatedUser();
 		Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
@@ -95,7 +95,7 @@ public class GroupService {
 			throw new InvalidGroupAdminException("You're not the group administrator");
 		groupRepository.delete(group);
 	}
-	// /api/groups/{groupId} GET -> Get the group info + users (only the username) (user must be a participant of the group to have the list of the users) (public/private group??)
+
 	public GroupDataDTO getGroupInfo(Long groupId) {
 		User user = authService.getAuthenticatedUser();
 		Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
@@ -105,20 +105,15 @@ public class GroupService {
 								group.getDescription(),
 								participants);
 	}
-	// /api/{groupId}/{userName} GET -> Get username + the resolutions of that user (user must be a participant of the groupId)
+
 	public List<ResolutionGetDTO> getUserResolutions(Long groupId, String username) {
 		User authUser = authService.getAuthenticatedUser();
+		groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
 		userGroupService.validateRelation(authUser.getId(), groupId);
 		User user = userService.getUserByUsername(username);
 		userGroupService.validateRelation(user.getId(), groupId);
 		return resolutionService.getUserResolutions(user);
 	}
-
-
-
-
-
-
 
 	public Group joinGroup(Long groupId) {
 		User user = authService.getAuthenticatedUser();
@@ -144,13 +139,9 @@ public class GroupService {
 			groupRepository.delete(group);
 			return ;
 		}
-
 		if (userGroup.isAdmin())
-			throw new InvalidGroupAdminException("Can't delete the group if you're the administrator");
-		/*
-			Decirle a Zino si le parece bien devolver error al ser admin para pedirle un cambio.
-			Delete group if necessary, decirle a Zino si lo quiere handlear el mandandome un /delete o si me encargo yo de una
-		*/
+			throw new ForbiddenCustomException("FORBIDDEN_ACTION", 
+											"Cannot leave the group being admin because there are users");
 		userGroupService.deleteRelation(userGroup);
 		group.decrementCapacity();
 		groupRepository.save(group);
@@ -167,17 +158,6 @@ public class GroupService {
 		userGroupService.changeRoleToMember(userGroup);
 		userGroupService.changeRoleToAdmin(newAdminRelation);
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 	private Group applyPatch(Map<String, Object> patchPayload, Group group) {
 		ObjectNode newNode = jsonMapper.convertValue(group, ObjectNode.class);

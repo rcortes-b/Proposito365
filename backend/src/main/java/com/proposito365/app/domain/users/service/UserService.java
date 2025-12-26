@@ -7,9 +7,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.proposito365.app.common.exceptions.InvalidPasswordException;
-import com.proposito365.app.common.exceptions.InvalidUserException;
-import com.proposito365.app.common.exceptions.UserNotFoundException;
+import com.proposito365.app.common.exceptions.users.InvalidPasswordException;
+import com.proposito365.app.common.exceptions.users.InvalidUserException;
+import com.proposito365.app.common.exceptions.users.UserNotFoundException;
 import com.proposito365.app.domain.users.domain.PasswordDTO;
 import com.proposito365.app.domain.users.domain.User;
 import com.proposito365.app.domain.users.domain.UserDTO;

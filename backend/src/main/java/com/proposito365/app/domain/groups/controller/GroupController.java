@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.domain.groups.domain.Group;
 import com.proposito365.app.domain.groups.domain.GroupCreationDTO;
+import com.proposito365.app.domain.groups.domain.GroupDataDTO;
 import com.proposito365.app.domain.groups.service.GroupService;
 
 /*	- /api/groups GET -> Get all the groups that a user is participant
@@ -53,6 +55,19 @@ public class GroupController {
 		Group response = groupService.updateGroupInfo(groupId, patchPayload);
 		return ResponseEntity.ok(response);
 	}
+
+	@DeleteMapping("/{groupId}")
+	public ResponseEntity<Void> deleteGroup(@PathVariable Long groupId) {
+		groupService.deleteGroup(groupId);
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/{groupId}")
+	public ResponseEntity<GroupDataDTO> getGroupInfo(@PathVariable Long groupId) {
+		GroupDataDTO groupDataDTO = groupService.getGroupInfo(groupId);
+		return ResponseEntity.ok(groupDataDTO);
+	}
+
 
 	@PostMapping("/{groupId}/join")
 	public ResponseEntity<Group> joinGroup(@PathVariable Long groupId) {

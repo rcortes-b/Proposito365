@@ -3,6 +3,7 @@
 **Note that every endpoint has a 200 OK status code!**
 
 ---
+---
 
 ## EmailVerification
 
@@ -10,9 +11,9 @@
 
 ### /api/email-validation POST
 
-**Validates the email when the user requests to change the email and if it is valid generates the code and sends to the email**
+- **USE: Validates the email when the user requests to change the email. If it is valid, generates the code and it's sent to the email**
 
-**Dependencies from the client: email**
+- **BODY DEPENDENCIES: email**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -22,10 +23,9 @@
 
 ### /api/email-verification POST
 
-**Verifies that the user request has to verify / requested an email change. Compares the code with the generated code**
-**If the code is valid, updates the authenticated user and generates new cookies**
+- **USE: Verifies that the user has to be verified or requested an email change. Compares the code with the generated code. If the code is valid, updates the authenticated user and generates new cookies**
 
-**Dependencies from the client: email, token**
+- **BODY DEPENDENCIES: email, token**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -34,6 +34,7 @@
 | 401 | INVALID_TOKEN | The given code don't match with the generated code |
 
 ---
+---
 
 ## Users
 
@@ -41,7 +42,7 @@
 
 ### /api/users GET
 
-**Retrieves the user information**
+- **USE: Retrieves the user profile information: email and username**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -51,20 +52,20 @@
 
 ### /api/users/change-username PATCH
 
-**Change the logged user username**
+- **USE: Change the username of the authenticated user**
 
-**Dependencies from the client: username**
+- **BODY DEPENDENCIES: username**
 
 | Status | Code | Reason |
 |--------|------|------|
 | 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
-| 401 | INVALID_USER | The specified user already exists |
+| 400 | INVALID_USER | The new username is already in use |
 
 ---
 
 ### /api/users DELETE
 
-**Deletes the logged user account**
+- **USE: Deletes the logged user account**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -72,27 +73,19 @@
 
 ---
 
-### /api/users/{groupId}/join POST
+### /api/users/change-password PATCH
 
-**The logged user joins to the specified groupId**
+- **USE: Change the password of the authenticated user**
+
+- **BODY DEPENDENCIES: oldPassword and newPassword**
 
 | Status | Code | Reason |
 |--------|------|------|
 | 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
-| 404 | GROUP_NOT_FOUND | The group doesn't exist |
+| 400 | INVALID_PASSWORD | The old password don't match with the current password |
+| 400 | INVALID_PASSWORD | The new password is the same than the current password |
 
 ---
-
-### /api/users/{groupId}/leave POST
-
-**The logged user leaves from the specified groupId**
-
-| Status | Code | Reason |
-|--------|------|------|
-| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
-| 404 | GROUP_NOT_FOUND | The group doesn't exist |
-| 401 | INVALID_RELATION | The user don't belong to the specified group |
-
 ---
 
 ## Resolutions
@@ -101,7 +94,7 @@
 
 ### /api/resolutions GET
 
-**Retrieve the resolutions from the logged user**
+- **USE: Retrieves the authenticated user resolutions**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -111,9 +104,9 @@
 
 ### /api/resolutions POST
 
-**The logged user creates a new resolution**
+- **USE: The authenticated user creates a new resolution**
 
-**Dependencies from the client: resolution (title), details**
+- **BODY DEPENDENCIES: resolution (title), details**
 
 | Status | Code | Reason |
 |--------|------|------|
@@ -123,25 +116,150 @@
 
 ### /api/resolutions/{resolutionId} PATCH
 
-**The logged user deletes the resolution specified by resolutionId**
+- **USE: The authenticated user deletes the resolution specified by resolutionId**
 
-**Dependencies from the client: resolution (title) OR details OR status OR some/all of them**
+- **BODY DEPENDENCIES: resolution (title) OR details OR status OR some/all of them**
 
 | Status | Code | Reason |
 |--------|------|------|
 | 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
 | 404 | RESOLUTION_NOT_FOUND | The resolution specified by resolutionId doesn't exist |
-| 401 | BAD_REQUEST | The user and resolution ids cannot be modified |
+| 400 | INVALID_REQUEST | The user and resolution ids cannot be modified |
 
 ---
 
 ### /api/resolutions/{resolutionId} DELETE
 
-**The logged user deletes the resolution specified by resolutionId**
+- **USE: The logged user deletes the resolution specified by resolutionId**
 
 | Status | Code | Reason |
 |--------|------|------|
 | 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
 | 404 | RESOLUTION_NOT_FOUND | The resolution specified by resolutionId doesn't exist |
 
+---
+---
+
+## Groups
+
+---
+
+### /api/groups GET
+
+- **USE: Get the groups that the authenticated user is participant**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+
+---
+
+### /api/groups POST
+
+- **USE: Create a new group**
+
+- **BODY DEPENDENCIES: (group) name, description**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+
+---
+
+### /api/groups/{groupId} PATCH
+
+- **USE: Update the group information (must be admin)**
+
+- **BODY DEPENDENCIES: name OR description OR BOTH**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+| 401 | INVALID_ADMIN | The authenticated user is not the admin of the group |
+| 400 | INVALID_REQUEST | The request sent is not valid, groupId and Capacity cannot be modified |
+
+---
+
+### /api/groups/{groupId} DELETE
+
+- **USE: Deletes the group (must be admin)**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+| 401 | INVALID_ADMIN | The authenticated user is not the admin of the group |
+
+---
+
+### /api/groups/{groupId} GET
+
+- **USE: Gets the group info: name, description and the list of usernames of the participants**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+
+---
+
+### /api/groups/{groupId}/{username} GET
+
+- **USE: Gets the resolutions of the specified group participant (user)**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+
+**NOTE: Aquí hay otro USER_NOT_FOUND si el user 'username' no existe y también otro INVALID_RELATION**
+
+---
+
+### /api/groups/{groupId}/join POST
+
+- **USE: The user joins to the specified group**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 403 | GROUP_IS_FULL | Cannot join the group because its capacity is full |
+
+---
+
+### /api/groups/{groupId}/leave POST
+
+- **USE: The user leaves from the specified group**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+| 403 | FORBIDDEN_ACTION | The admin cannot leave the group if there's more than one user |
+
+---
+
+### /api/groups/{groupId}/change-admin POST
+
+- **USE: Changes the group administrator**
+
+- **BODY DEPENDENCIES: username**
+
+| Status | Code | Reason |
+|--------|------|------|
+| 404 | USER_NOT_FOUND | The logged user cannot be found in the database |
+| 404 | GROUP_NOT_FOUND | The groupId don't match with any group |
+| 401 | INVALID_RELATION | The authenticated user is not a participant of the group |
+| 401 | INVALID_ADMIN | The authenticated user is not the admin of the group |
+
+**NOTE: Aquí hay otro USER_NOT_FOUND si el user 'username' no existe y también otro INVALID_RELATION**
+
+---
 ---
