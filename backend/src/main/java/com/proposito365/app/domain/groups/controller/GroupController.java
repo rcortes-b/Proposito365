@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proposito365.app.domain.groups.domain.Group;
@@ -64,5 +65,12 @@ public class GroupController {
 		groupService.leaveGroup(groupId);
 		return ResponseEntity.ok().build();
 	}
+
+	@PostMapping("/{groupId}/change-admin")
+	public ResponseEntity<Void> changeGroupAdmin(@PathVariable Long groupId, @RequestParam String username) {
+		groupService.changeGroupAdmin(groupId, username);
+		return ResponseEntity.ok().build();
+	}
+	
 
 }

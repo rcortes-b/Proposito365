@@ -109,7 +109,7 @@ public class GroupService {
 	public List<ResolutionGetDTO> getUserResolutions(Long groupId, String username) {
 		User authUser = authService.getAuthenticatedUser();
 		userGroupService.validateRelation(authUser.getId(), groupId);
-		User user = userService.getUser(username);
+		User user = userService.getUserByUsername(username);
 		userGroupService.validateRelation(user.getId(), groupId);
 		return resolutionService.getUserResolutions(user);
 	}
@@ -140,21 +140,33 @@ public class GroupService {
 		User user = authService.getAuthenticatedUser();
 		Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
 		UserGroup userGroup = userGroupService.findRelationByIds(user.getId(), group.getId());
-
-		if (userGroup.isAdmin()) {
-			if (group.getCapacity() > 1)
-				throw new InvalidGroupAdminException("Can't delete the group if you're the administrator");
+		if (group.getCapacity() == 1) {
+			groupRepository.delete(group);
+			return ;
 		}
+
+		if (userGroup.isAdmin())
+			throw new InvalidGroupAdminException("Can't delete the group if you're the administrator");
 		/*
 			Decirle a Zino si le parece bien devolver error al ser admin para pedirle un cambio.
 			Delete group if necessary, decirle a Zino si lo quiere handlear el mandandome un /delete o si me encargo yo de una
 		*/
-		group.decrementCapacity();
 		userGroupService.deleteRelation(userGroup);
+		group.decrementCapacity();
 		groupRepository.save(group);
 	}
 
-
+	public void changeGroupAdmin(Long groupId, String username) {
+		User user = authService.getAuthenticatedUser();
+		Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+		UserGroup userGroup = userGroupService.findRelationByIds(user.getId(), group.getId());
+		if (!userGroup.isAdmin())
+			throw new InvalidGroupAdminException("You're not the admin of the group");
+		User newAdmin = userService.getUserByUsername(username);
+		UserGroup newAdminRelation = userGroupService.findRelationByIds(newAdmin.getId(), group.getId());
+		userGroupService.changeRoleToMember(userGroup);
+		userGroupService.changeRoleToAdmin(newAdminRelation);
+	}
 
 
 

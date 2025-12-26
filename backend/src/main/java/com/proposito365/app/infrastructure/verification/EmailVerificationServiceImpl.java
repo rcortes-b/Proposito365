@@ -1,6 +1,5 @@
 package com.proposito365.app.infrastructure.verification;
 
-import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.Optional;
 
@@ -11,33 +10,33 @@ import org.springframework.stereotype.Service;
 
 import com.proposito365.app.common.exceptions.InvalidEmailException;
 import com.proposito365.app.domain.users.domain.User;
-import com.proposito365.app.domain.users.repository.UserRepository;
+import com.proposito365.app.domain.users.service.UserService;
 import com.proposito365.app.infrastructure.middleware.auth.AuthService;
 
 @Service
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
-	private EmailVerificationRepository emailVerificationRepository;
-	private UserRepository userRepository;
 	private AuthService authService;
+	private UserService userService;
+	private EmailVerificationRepository emailVerificationRepository;
 	
 	@Autowired
     private JavaMailSender mailSender;
 
 	public EmailVerificationServiceImpl(EmailVerificationRepository emailVerificationRepository,
-										UserRepository userRepository, JavaMailSender mailSender,
+										UserService userService, JavaMailSender mailSender,
 											AuthService authService) {
 		this.emailVerificationRepository = emailVerificationRepository;
-		this.userRepository = userRepository;
+		this.userService = userService;
 		this.mailSender = mailSender;
 		this.authService = authService;
 	}
 
 	@Override
 	public void validateEmail(String email) {
-		final Optional<User> user = userRepository.findByEmail(email);
-		if (!user.isEmpty())
-			throw new InvalidEmailException("EMAIL_NOT_VALID", "Email is already in use");
+		Optional<User> user = userService.getUserByEmail(email);
+		if (user.isEmpty() == false)
+			throw new InvalidEmailException("INVALID_EMAIL", "Email already exists");
 	}
 
 	@Override
@@ -65,28 +64,35 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         mailSender.send(message);
 	}
 
+	/*
+		First i check if a token exists in the database, then if the token has expired or not
+		Compare the tokens and if is register i update the user to verified and if is email-change
+		i just get the current user and update its email
+	*/
+
 	@Override
-	public void verificateEmail(EmailVerificationDTO emailVerificationDTO, Principal login) {
-		Optional<EmailVerification> emailVerification = emailVerificationRepository.findByEmail(emailVerificationDTO.email());
-		if (emailVerification.isEmpty())
-			throw new InvalidEmailException("EMAIL_NOT_VALID", "This email doesn't need to be verified");
+	public void verificateEmail(EmailVerificationDTO emailVerificationDTO) {
+		EmailVerification emailVerification = emailVerificationRepository.findByEmail(emailVerificationDTO.email())
+		.orElseThrow(() -> new InvalidEmailException("EMAIL_NOT_VALID", "This email doesn't need to be verified"));
+
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		if (timestamp.after(emailVerification.get().getExpiresAt())) {
-			emailVerificationRepository.delete(emailVerification.get());
+		if (timestamp.after(emailVerification.getExpiresAt())) {
+			emailVerificationRepository.delete(emailVerification);
 			throw new InvalidEmailException("TOKEN_EXPIRED", "The verification code has expired");
 		}
-		if (emailVerificationDTO.token() != emailVerification.get().getToken())
-			throw new InvalidEmailException("INVALID_TOKEN", "The verification doesn't match");
-		Optional<User> user = userRepository.findByEmail(emailVerificationDTO.email());
-		if (!user.isEmpty()) {
+
+		if (emailVerificationDTO.token() != emailVerification.getToken())
+			throw new InvalidEmailException("INVALID_TOKEN", "The verification code doesn't match");
+
+		Optional<User> user = userService.getUserByEmail(emailVerificationDTO.email());
+		if (user.isEmpty() == false) {
 			user.get().setVerified(true);
-			userRepository.save(user.get());
+			userService.saveUser(user.get());
 		} else {
-			Optional<User> newEmailUser = userRepository.findByUsernameOrEmail(login.getName());
-			userRepository.delete(newEmailUser.get());
-			newEmailUser.get().setEmail(emailVerificationDTO.email());
-			userRepository.save(newEmailUser.get());
-			authService.updateCurrentUser(newEmailUser.get());
+			User newUser = authService.getAuthenticatedUser();
+			newUser.setEmail(emailVerificationDTO.email());
+			userService.saveUser(newUser);
+			authService.updateCurrentUser(newUser);
 			authService.generateCookies();
 		}
 	}

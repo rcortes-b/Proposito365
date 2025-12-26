@@ -1,7 +1,5 @@
 package com.proposito365.app.infrastructure.verification;
 
-import java.security.Principal;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,9 +30,8 @@ public class EmailVerificationController {
 	}
 
 	@PostMapping("/email-verification")
-	public ResponseEntity<Void> validateEmail(@RequestBody EmailVerificationDTO emailVerificationDTO,
-												Principal login) {
-		emailVerificationService.verificateEmail(emailVerificationDTO, login);
+	public ResponseEntity<Void> validateEmail(@RequestBody EmailVerificationDTO emailVerificationDTO) {
+		emailVerificationService.verificateEmail(emailVerificationDTO);
 		return ResponseEntity.ok().build();
 	}
 }

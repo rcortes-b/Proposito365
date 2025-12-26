@@ -5,10 +5,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.proposito365.app.domain.users.domain.PasswordDTO;
 import com.proposito365.app.domain.users.domain.User;
 import com.proposito365.app.domain.users.domain.UserDTO;
 import com.proposito365.app.domain.users.service.UserService;
@@ -41,8 +44,14 @@ public class UserController {
 
 	@DeleteMapping
 	public ResponseEntity<Void> deleteUser(Authentication authentication) {
-		userService.deleteUser();
+		userService.deleteUser(authService.getAuthenticatedUser());
 		/* Delete cookies!!!!!!!!!! */
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/change-password")
+	public ResponseEntity<Void> changePassword(@RequestBody PasswordDTO passwordDTO) {
+		userService.changePassword(passwordDTO);
 		return ResponseEntity.ok().build();
 	}
 }

@@ -2,11 +2,15 @@ package com.proposito365.app.domain.users.service;
 
 import java.util.Optional;
 
+import org.jboss.logging.Logger;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.proposito365.app.common.exceptions.InvalidPasswordException;
 import com.proposito365.app.common.exceptions.InvalidUserException;
 import com.proposito365.app.common.exceptions.UserNotFoundException;
+import com.proposito365.app.domain.users.domain.PasswordDTO;
 import com.proposito365.app.domain.users.domain.User;
 import com.proposito365.app.domain.users.domain.UserDTO;
 import com.proposito365.app.domain.users.repository.UserRepository;
@@ -21,15 +25,23 @@ import com.proposito365.app.infrastructure.middleware.auth.AuthService;
 @Service
 @Transactional
 public class UserService {
+	private static final Logger logger = Logger.getLogger(UserService.class);
 	private AuthService authService;
 	private UserRepository userRepository;
+	private PasswordEncoder passwordEncoder;
 
-	public UserService(AuthService authService, UserRepository userRepository) {
+	public UserService(AuthService authService, UserRepository userRepository,
+						PasswordEncoder passwordEncoder) {
 		this.authService = authService;
 		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
-	public User getUser(String username) {
+	public Optional<User> getUserByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	public User getUserByUsername(String username) {
 		User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
 		return user;
 	}
@@ -51,8 +63,24 @@ public class UserService {
 		return user;
 	}
 
-	public void deleteUser() {
+	public void saveUser(User user) {
+		if (user != null)
+			userRepository.save(user);
+	}
+
+	public void deleteUser(User user) {
+		if (user != null)
+			userRepository.delete(user);
+	}
+
+	public void changePassword(PasswordDTO passwordDTO) {
 		User user = authService.getAuthenticatedUser();
-		userRepository.delete(user);
+		logger.info("[USER SERVICE] Password: " + user.getPassword());
+		if (!passwordEncoder.matches(passwordDTO.oldPassword(), user.getPassword()))
+			throw new InvalidPasswordException("The password doesn't match");
+		if (!passwordEncoder.matches(passwordDTO.newPassword(), user.getPassword()))
+			throw new InvalidPasswordException("The new password cannot be the same than the old");
+		user.setPassword(passwordEncoder.encode(passwordDTO.newPassword()));
+		userRepository.save(user);
 	}
 }

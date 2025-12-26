@@ -2,21 +2,29 @@ package com.proposito365.app.domain.user_group;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jboss.logging.Logger;
 import org.springframework.stereotype.Service;
 
 import com.proposito365.app.common.exceptions.UserGroupRelationException;
 import com.proposito365.app.domain.groups.domain.Group;
 import com.proposito365.app.domain.roles.Roles;
+import com.proposito365.app.domain.roles.RolesEnum;
+import com.proposito365.app.domain.roles.RolesRepository;
 import com.proposito365.app.domain.users.domain.User;
 
 @Service
 public class UserGroupServiceImpl implements UserGroupService {
+	private final static Logger logger = Logger.getLogger(UserGroupServiceImpl.class);
 	private UserGroupRepository userGroupRepository;
+	private RolesRepository rolesRepository;
 
-	public UserGroupServiceImpl(UserGroupRepository userGroupRepository) {
+	public UserGroupServiceImpl(UserGroupRepository userGroupRepository,
+								RolesRepository rolesRepository) {
 		this.userGroupRepository = userGroupRepository;
+		this.rolesRepository = rolesRepository;
 	}
 
 	public UserGroup findRelationByIds(Long userId, Long groupId) {
@@ -50,5 +58,27 @@ public class UserGroupServiceImpl implements UserGroupService {
 
 	public void validateRelation(Long userId, Long groupId) {
 		this.findRelationByIds(userId, groupId);
+	}
+
+	public UserGroup changeRoleToAdmin(UserGroup userGroup) {
+		Optional<Roles> role = rolesRepository.findByRole(RolesEnum.ADMIN.getDbValue());
+		if (role.isEmpty()) {
+			logger.error("[USERGROUP SERVICE] Personal checker --- Roles uncorrect linking");
+			throw new RuntimeException();
+		}
+		userGroup.setRole(role.get());
+		userGroupRepository.save(userGroup);
+		return userGroup;
+	}
+
+	public UserGroup changeRoleToMember(UserGroup userGroup) {
+		Optional<Roles> role = rolesRepository.findByRole(RolesEnum.MEMBER.getDbValue());
+		if (role.isEmpty()) {
+			logger.error("[USERGROUP SERVICE] Personal checker --- Roles uncorrect linking");
+			throw new RuntimeException();
+		}
+		userGroup.setRole(role.get());
+		userGroupRepository.save(userGroup);
+		return userGroup;
 	}
 }

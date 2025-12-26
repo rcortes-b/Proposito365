@@ -61,6 +61,8 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 		logger.info("[USER] : User successfully created with id " + finalUser.getId());
 	}
 
+
+
 	@Override
 	public User getUser(Long id) {
 		Optional<User> user = userRepository.findById(id);
@@ -187,5 +189,10 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 			logger.error("[USER] : User not found with id: " + id + " --- Remember add the Exception 3!!!");
 		logger.info("[USER] : User successfully obtained with username " + user.get().getUsername());
 		return new UserSecurity(user.get());
+	}
+
+	@Override
+	public String getEncodedPassword(String password) {
+		return passwordEncoder.encode(password);
 	}
 }

@@ -13,4 +13,6 @@ public interface UserGroupService {
 	List<Group> getGroups(User user);
 	List<String> getParticipants(Group group);
 	void validateRelation(Long userId, Long groupId);
+	UserGroup changeRoleToAdmin(UserGroup userGroup);
+	UserGroup changeRoleToMember(UserGroup userGroup);
 }
