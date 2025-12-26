@@ -1,3 +1,6 @@
 package com.proposito365.app.domain.resolutions.domain;
 
-public record ResolutionPostDTO(String resolution, String details) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record ResolutionPostDTO(@NotBlank String resolution, @NotNull String details) {}

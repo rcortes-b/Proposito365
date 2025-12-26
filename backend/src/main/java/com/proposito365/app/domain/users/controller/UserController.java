@@ -42,9 +42,9 @@ public class UserController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<Void> deleteUser(Authentication authentication) {
+	public ResponseEntity<Void> deleteUser() {
 		userService.deleteUser(authService.getAuthenticatedUser());
-		/* Delete cookies!!!!!!!!!! */
+		authService.deleteCookies();
 		return ResponseEntity.ok().build();
 	}
 

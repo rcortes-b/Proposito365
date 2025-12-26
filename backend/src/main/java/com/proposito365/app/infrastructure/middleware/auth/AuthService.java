@@ -25,4 +25,5 @@ public interface AuthService {
 	void updateCurrentUser(User updatedUser);
 	Cookie createAuthCookie(String token, boolean isRefresh);
 	String getEncodedPassword(String password);
+	void deleteCookies();
 }

@@ -49,12 +49,7 @@ public class AuthController {
 	*/
 	@PostMapping("/auth/logout")
 	public void logout(HttpServletResponse response) {
-		final Cookie cookie = authService.createAuthCookie("", false);
-		final Cookie cookieRefresh = authService.createAuthCookie("", true);
-		cookie.setMaxAge(0);
-		cookieRefresh.setMaxAge(0);
-		response.addCookie(cookie);
-		response.addCookie(cookieRefresh);
+		authService.deleteCookies();
 	}
 
 	@PostMapping("/refresh")

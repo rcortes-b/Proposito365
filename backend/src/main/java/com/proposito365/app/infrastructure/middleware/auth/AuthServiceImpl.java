@@ -195,4 +195,16 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	public String getEncodedPassword(String password) {
 		return passwordEncoder.encode(password);
 	}
+
+	@Override
+	public void deleteCookies() {
+		final ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		final HttpServletResponse response = attrs.getResponse();
+		final Cookie cookie = createAuthCookie("", false);
+		final Cookie cookieRefresh = createAuthCookie("", true);
+		cookie.setMaxAge(0);
+		cookieRefresh.setMaxAge(0);
+		response.addCookie(cookie);
+		response.addCookie(cookieRefresh);
+	}
 }
