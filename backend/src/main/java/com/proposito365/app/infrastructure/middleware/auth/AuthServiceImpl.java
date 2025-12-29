@@ -133,8 +133,9 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 	}
 
 	@Override
-	public void generateCookies() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	public void generateCookies(Authentication authentication) {
+		if (authentication == null)
+			authentication = SecurityContextHolder.getContext().getAuthentication();
 		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		HttpServletResponse response = attrs.getResponse();
 

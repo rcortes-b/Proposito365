@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         final String requestURI = request.getRequestURI();
-        return requestURI.startsWith(SecurityConfig.PREFIX_URL_MATCHER);
+		logger.info("[REQ URI]: " + requestURI + " " + requestURI.startsWith(SecurityConfig.PREFIX_URL_MATCHER));
+        return requestURI.startsWith(SecurityConfig.PREFIX_URL_MATCHER) || requestURI.equals("/api/email-verification");
     }
 
     @Override

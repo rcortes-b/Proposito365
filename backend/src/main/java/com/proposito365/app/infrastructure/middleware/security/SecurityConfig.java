@@ -57,7 +57,7 @@ public class SecurityConfig {
 		SecurityFilterChain filter = http
 				.formLogin(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-										.requestMatchers(HttpMethod.POST, "/auth/**", "/refresh").permitAll()
+										.requestMatchers(HttpMethod.POST, "/auth/**", "/refresh", "/api/email-verification").permitAll()
 										.anyRequest().authenticated()
 										)
 				.addFilterBefore(new JwtAuthenticationFilter(authService, userDetailsService, cookieProperties),

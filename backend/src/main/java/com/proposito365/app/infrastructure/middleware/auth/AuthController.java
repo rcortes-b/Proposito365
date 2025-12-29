@@ -40,8 +40,8 @@ public class AuthController {
 
 	@PostMapping("/auth/login")
 	public void login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
-		authService.login(loginRequestDTO);
-		authService.generateCookies();
+		Authentication authentication = authService.login(loginRequestDTO);
+		authService.generateCookies(authentication);
 	}
 
 	/* Creates a new cookie with the same name and sets it to empty and expired

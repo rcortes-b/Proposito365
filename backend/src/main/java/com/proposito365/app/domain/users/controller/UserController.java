@@ -1,7 +1,6 @@
 package com.proposito365.app.domain.users.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,7 +36,7 @@ public class UserController {
 	public ResponseEntity<User> updateUserInfo(@RequestParam String username) {
 		User response = userService.updateUsername(username);
 		authService.updateCurrentUser(response);
-		authService.generateCookies();
+		authService.generateCookies(null);
 		return ResponseEntity.ok(response);
 	}
 

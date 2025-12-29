@@ -27,8 +27,8 @@ CREATE TABLE email_verification (
 	`id` int AUTO_INCREMENT PRIMARY KEY,
 	`email` VARCHAR(255) UNIQUE NOT NULL,
 	`token` VARCHAR(6) NOT NULL,
-	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	`expires_at` TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 15 MINUTE)
+	`created_at` TIMESTAMP,
+	`expires_at` TIMESTAMP
 );
 
 CREATE TABLE resolution_status (

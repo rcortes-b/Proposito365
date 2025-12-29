@@ -21,7 +21,7 @@ public interface AuthService {
 	String generateToken(Authentication authentication, boolean isRefresh);
 	void validateRefreshCookie(HttpServletRequest request, HttpServletResponse response);
 	UserDetails loadUserById(Long id);
-	void generateCookies();
+	void generateCookies(Authentication authentication);
 	void updateCurrentUser(User updatedUser);
 	Cookie createAuthCookie(String token, boolean isRefresh);
 	String getEncodedPassword(String password);

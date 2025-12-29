@@ -1,6 +1,6 @@
 package com.proposito365.app.infrastructure.verification.domain;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,10 +22,10 @@ public class EmailVerification {
 	private String token;
 
 	@Column(name = "created_at")
-	private Timestamp createdAt;
+	private Instant createdAt;
 
 	@Column(name = "expires_at")
-	private Timestamp expiresAt;
+	private Instant expiresAt;
 
 	public Long getId() {
 		return id;
@@ -51,19 +51,19 @@ public class EmailVerification {
 		this.token = token;
 	}
 
-	public Timestamp getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
 
-	public Timestamp getExpiresAt() {
+	public Instant getExpiresAt() {
 		return expiresAt;
 	}
 
-	public void setExpiresAt(Timestamp expiresAt) {
+	public void setExpiresAt(Instant expiresAt) {
 		this.expiresAt = expiresAt;
 	}
 

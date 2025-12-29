@@ -1,8 +1,10 @@
 package com.proposito365.app.infrastructure.verification.service;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +23,7 @@ import com.proposito365.app.infrastructure.verification.repository.EmailVerifica
 
 @Service
 public class EmailVerificationServiceImpl implements EmailVerificationService {
-
+	private final static Logger logger = Logger.getLogger(EmailVerificationServiceImpl.class);
 	private AuthService authService;
 	private UserService userService;
 	private EmailVerificationRepository emailVerificationRepository;
@@ -57,6 +59,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 			newEmailVerification = emailVerification.get();
 		}
 		newEmailVerification.setToken(verificationCode);
+		newEmailVerification.setCreatedAt(Instant.now());
+		newEmailVerification.setExpiresAt(Instant.now().plus(15, ChronoUnit.MINUTES));
 		emailVerificationRepository.save(newEmailVerification);
 		return verificationCode;
 	}
@@ -82,13 +86,15 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 											  .findByEmail(emailVerificationDTO.email())
 											  .orElseThrow(InvalidEmailException::new);
 
-		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		if (timestamp.after(emailVerification.getExpiresAt())) {
+		Instant currTime = Instant.now();
+		logger.info("[EMAIL VERIF]: " + emailVerification.getExpiresAt());
+		if (currTime.isAfter(emailVerification.getExpiresAt())) {
 			emailVerificationRepository.delete(emailVerification);
 			throw new TokenExpiredException();
 		}
-
-		if (emailVerificationDTO.token() != emailVerification.getToken())
+	
+		logger.info("[INFOOOO] " + emailVerificationDTO.token() + " " + emailVerification.getToken());
+		if (!emailVerificationDTO.token().equals(emailVerification.getToken()))
 			throw new InvalidTokenException();
 
 		Optional<User> user = userService.getUserByEmail(emailVerificationDTO.email());
@@ -100,7 +106,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 			newUser.setEmail(emailVerificationDTO.email());
 			userService.saveUser(newUser);
 			authService.updateCurrentUser(newUser);
-			authService.generateCookies();
+			authService.generateCookies(null);
 		}
 	}
 }
